@@ -36,5 +36,17 @@ impl EventLoop {
         }
     }
 
+    pub fn register(&mut self){
 
+    }
+
+    /// private method
+    fn deregister(&mut self){
+
+    }
+
+    /// thread run loop
+    fn runLoop(&mut self){
+
+    }
 }
