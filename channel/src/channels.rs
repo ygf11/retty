@@ -1,4 +1,4 @@
-
+/// channel trait
 pub trait Channel{
     fn get(&self);
 
@@ -6,3 +6,4 @@ pub trait Channel{
 
     fn write(&self);
 }
+

@@ -10,6 +10,7 @@ use channel::channels::Channel;
 use std::collections::HashMap;
 use std::thread::Thread;
 use std::thread::Builder;
+use std::time::Duration;
 
 struct EventLoop {
     channels: HashMap<Token, Box<dyn Channel>>,
@@ -29,8 +30,8 @@ impl EventLoop {
         EventLoop {
             poll,
             channels: HashMap::new(),
-            events: Events::with_capacity(128),
             thread: Builder::new(),
+            events: Events::with_capacity(128),
         }
     }
 
@@ -40,5 +41,24 @@ impl EventLoop {
     fn deregister(&mut self) {}
 
     /// thread run loop
-    fn run_loop(&mut self) {}
+    fn run_loop(&mut self) {
+        let mut poll = &mut self.poll;
+        let mut events = &mut self.events;
+        let mut channels = &mut self.channels;
+        loop {
+            poll.poll(events, Some(Duration::from_millis(100)));
+
+            for event in events.iter(){
+                match event.token() {
+                    reader => if event.readiness().is_readable(){
+
+                    }
+
+                    writer => if event.readiness().is_writable(){
+
+                    }
+                }
+            }
+        }
+    }
 }
