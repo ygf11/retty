@@ -16,12 +16,12 @@ use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
 
 struct EventLoop {
-    sender: Sender<Box<dyn Task>>,
-    receiver: Receiver<Box<dyn Task>>,
     poll: Poll,
     events: Events,
     thread: Builder,
     channels: HashMap<Token, Box<dyn Channel>>,
+    sender: Sender<Box<dyn Task>>,
+    receiver: Receiver<Box<dyn Task>>,
 }
 
 impl EventLoop {
@@ -81,4 +81,6 @@ impl EventLoop {
 
 trait Task{
     fn run(&mut self);
+
+    fn after(&mut self);
 }

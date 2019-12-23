@@ -4,6 +4,10 @@ use std::net::{TcpStream, TcpListener};
 pub trait Channel{
     fn get(&self);
 
+    fn bind(&mut self);
+
+    fn connect(&mut self);
+
     fn read(&self);
 
     fn write(&self);
@@ -23,6 +27,14 @@ impl SocketChannel{
 
 impl Channel for SocketChannel{
     fn get(&self){
+
+    }
+
+    fn bind(&mut self){
+
+    }
+
+    fn connect(&mut self){
 
     }
 
@@ -50,6 +62,14 @@ impl ServerChannel {
 
 impl Channel for ServerChannel{
     fn get(&self){
+
+    }
+
+    fn bind(&mut self){
+
+    }
+
+    fn connect(&mut self){
 
     }
 
