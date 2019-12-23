@@ -3,10 +3,38 @@ extern crate mio;
 
 use mio::Poll;
 use mio::Events;
-use channel::channel::Channel;
+use mio::net::TcpStream;
+use mio::Token;
+use mio::net::TcpListener;
+use channel::channels::Channel;
+use std::collections::HashMap;
+use std::thread::Thread;
+use std::thread::Builder;
 
 struct EventLoop {
-    channel: Channel,
+    servers: HashMap<Token, TcpListener>,
+    channels: HashMap<Token, TcpStream>,
     poll: Poll,
     events: Events,
+    thread: Builder
+}
+
+impl EventLoop {
+    fn new() -> EventLoop {
+        let poll = match Poll::new() {
+            Ok(p) => p,
+            Err(e) => panic!("create mio poll failed!"),
+        };
+
+
+        EventLoop {
+            poll,
+            servers: HashMap::new(),
+            channels: HashMap::new(),
+            events: Events::with_capacity(128),
+            thread: Builder::new(),
+        }
+    }
+
+
 }
