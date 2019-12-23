@@ -16,8 +16,8 @@ use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
 
 struct EventLoop {
-    sender: Sender<Box<Task>>,
-    receiver: Receiver<Box<Task>>,
+    sender: Sender<Box<dyn Task>>,
+    receiver: Receiver<Box<dyn Task>>,
     poll: Poll,
     events: Events,
     thread: Builder,
@@ -70,8 +70,12 @@ impl EventLoop {
         }
     }
 
-    pub fn producer(&self) -> Sender<Box<Task>>{
+    pub fn producer(&self) -> Sender<Box<dyn Task>>{
         self.sender.clone()
+    }
+
+    pub fn execute(&mut self, task: Box<dyn Task>) {
+        self.sender.clone().send(task);
     }
 }
 
