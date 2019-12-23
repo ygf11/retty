@@ -35,7 +35,7 @@ impl EventLoop {
         }
     }
 
-    pub fn register(&mut self) {}
+    pub fn register(&mut self, channel: impl Channel) {}
 
     /// private method
     fn deregister(&mut self) {}
