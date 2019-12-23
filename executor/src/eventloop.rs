@@ -19,9 +19,9 @@ struct EventLoop {
     poll: Poll,
     events: Events,
     thread: Builder,
-    channels: HashMap<Token, Box<dyn Channel>>,
     sender: Sender<Box<dyn Task>>,
     receiver: Receiver<Box<dyn Task>>,
+    channels: HashMap<Token, Box<dyn Channel>>,
 }
 
 impl EventLoop {
