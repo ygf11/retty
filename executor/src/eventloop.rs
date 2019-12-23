@@ -11,12 +11,17 @@ use std::collections::HashMap;
 use std::thread::Thread;
 use std::thread::Builder;
 use std::time::Duration;
+use std::sync::mpsc::channel;
+use std::sync::mpsc::Sender;
+use std::sync::mpsc::Receiver;
 
 struct EventLoop {
-    channels: HashMap<Token, Box<dyn Channel>>,
+    sender: Sender<u8>,
+    receiver: Receiver<u8>,
     poll: Poll,
     events: Events,
     thread: Builder,
+    channels: HashMap<Token, Box<dyn Channel>>,
 }
 
 impl EventLoop {
@@ -26,9 +31,12 @@ impl EventLoop {
             Err(e) => panic!("create mio poll failed!"),
         };
 
+        let (sender, receiver) = channel();
 
         EventLoop {
             poll,
+            sender,
+            receiver,
             channels: HashMap::new(),
             thread: Builder::new(),
             events: Events::with_capacity(128),
@@ -60,5 +68,9 @@ impl EventLoop {
                 }
             }
         }
+    }
+
+    pub fn producer(&self) -> Sender<u8>{
+        self.sender.clone()
     }
 }
