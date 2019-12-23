@@ -12,11 +12,10 @@ use std::thread::Thread;
 use std::thread::Builder;
 
 struct EventLoop {
-    servers: HashMap<Token, TcpListener>,
-    channels: HashMap<Token, TcpStream>,
+    channels: HashMap<Token, Box<dyn Channel>>,
     poll: Poll,
     events: Events,
-    thread: Builder
+    thread: Builder,
 }
 
 impl EventLoop {
@@ -29,24 +28,17 @@ impl EventLoop {
 
         EventLoop {
             poll,
-            servers: HashMap::new(),
             channels: HashMap::new(),
             events: Events::with_capacity(128),
             thread: Builder::new(),
         }
     }
 
-    pub fn register(&mut self){
-
-    }
+    pub fn register(&mut self) {}
 
     /// private method
-    fn deregister(&mut self){
-
-    }
+    fn deregister(&mut self) {}
 
     /// thread run loop
-    fn runLoop(&mut self){
-
-    }
+    fn run_loop(&mut self) {}
 }
