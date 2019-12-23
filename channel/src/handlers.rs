@@ -1,11 +1,12 @@
 pub trait Handler{
-    /// in bound
-    fn handle_in_bound(&self);
 
-    /// out bound
-    fn handle_out_bound(&self);
+    fn fire_channel_read(&self);
 
-    fn handle(&self);
+    fn fire_channel_write(&self);
+
+    fn fire_channel_registered(&self);
+
+    fn fire_channel_deregsiter(&self);
 }
 
 

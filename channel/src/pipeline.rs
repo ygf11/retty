@@ -12,19 +12,5 @@ impl PipeLine {
         }
     }
 
-    pub fn fire_channel_registered(&self){
 
-    }
-
-    pub fn fire_channel_deregsiter(&self){
-
-    }
-
-    pub fn fire_channel_read(&self){
-
-    }
-
-    pub fn fire_channel_write(&self){
-
-    }
 }
