@@ -41,6 +41,15 @@ impl PipeLine {
         }
     }
 
+    /// iterate from tail
+    pub fn iter_from_tail(&mut self){
+        let mut cur = self.get_tail();
+        while let Some(node) = cur{
+            // TODO add handle()
+            cur = self.get_node(node.prev);
+        }
+    }
+
     fn get_head(&mut self) -> Option<Box<Node>> {
         unsafe {
             self.head.map(|node| {
