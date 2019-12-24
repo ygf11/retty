@@ -31,8 +31,41 @@ impl PipeLine {
             self.tail = raw_ptr;
         }
     }
-}
 
+    /// iterate from head
+    pub fn iter_from_head(&mut self) {
+        let mut cur = self.get_head();
+        while let Some(node) = cur {
+            // TODO add handle()
+            cur = self.get_node(node.next);
+        }
+    }
+
+    fn get_head(&mut self) -> Option<Box<Node>> {
+        unsafe {
+            self.head.map(|node| {
+                Box::from_raw(node)
+            })
+        }
+    }
+
+    fn get_tail(&mut self) -> Option<Box<Node>> {
+        unsafe {
+            self.tail.map(|node| {
+                Box::from_raw(node)
+            })
+        }
+    }
+
+    fn get_node(&self, node:Option<*mut Node>) -> Option<Box<Node>>{
+        unsafe{
+            node.map(|node| {
+                Box::from_raw(node)
+            })
+
+        }
+    }
+}
 
 struct Node {
     prev: Option<*mut Node>,
@@ -53,5 +86,3 @@ impl Node {
         self.handler
     }
 }
-
-
