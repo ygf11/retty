@@ -9,9 +9,10 @@ pub trait Channel{
 
     fn connect(&mut self);
 
-    /// event loop inoke this read method
+    /// event loop invoke this read method
     fn read(&self);
 
+    /// callback
     fn write(&self);
 }
 
