@@ -1,4 +1,5 @@
 use std::net::{TcpStream, TcpListener};
+use self::super::pipeline::PipeLine;
 
 /// channel trait
 pub trait Channel{
@@ -8,6 +9,7 @@ pub trait Channel{
 
     fn connect(&mut self);
 
+    /// event loop inoke this read method
     fn read(&self);
 
     fn write(&self);
@@ -16,6 +18,7 @@ pub trait Channel{
 pub struct SocketChannel {
     channel: TcpStream,
     write_buf: Vec<u8>,
+    pipeline: PipeLine,
 }
 
 impl SocketChannel{
@@ -23,13 +26,16 @@ impl SocketChannel{
         SocketChannel{
             channel,
             write_buf:Vec::new(),
+            pipeline: PipeLine::new(),
         }
     }
 }
 
 impl Channel for SocketChannel{
     fn get(&self){
-
+        /// 1. read from tcp stream
+        /// 2. handle read events
+        /// 3. write into tcp stream
     }
 
     fn bind(&mut self){
@@ -51,13 +57,14 @@ impl Channel for SocketChannel{
 
 pub struct ServerChannel{
     channel: TcpListener,
+    pipeline:PipeLine,
 }
 
 impl ServerChannel {
-    pub fn new(channel:TcpStream) -> SocketChannel{
-        SocketChannel{
+    pub fn new(channel:TcpListener) -> ServerChannel{
+        ServerChannel{
             channel,
-            write_buf:Vec::new(),
+            pipeline:PipeLine::new(),
         }
     }
 }

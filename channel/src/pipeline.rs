@@ -7,7 +7,7 @@ pub struct PipeLine {
 }
 
 impl PipeLine {
-    fn new() -> PipeLine {
+    pub fn new() -> PipeLine {
         PipeLine {
             head: None,
             tail: None,
