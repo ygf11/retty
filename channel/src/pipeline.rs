@@ -2,15 +2,27 @@ use self::super::handlers::Handler;
 
 /// channel pipeline
 pub struct PipeLine{
-    handlers: Vec<Box<dyn Handler>>,
+    head: Option<*mut Node>,
+    tail: Option<*mut Node>,
 }
 
 impl PipeLine {
-    pub fn new() -> PipeLine{
+    fn new() -> PipeLine{
         PipeLine{
-            handlers:Vec::new()
+            head:None,
+            tail:None
         }
     }
-
-
 }
+
+
+struct Node{
+    handler: Box<dyn Handler>,
+    prev: Option<*mut Node>,
+    next: Option<*mut Node>,
+}
+
+
+
+
+
