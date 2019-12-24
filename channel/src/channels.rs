@@ -15,12 +15,14 @@ pub trait Channel{
 
 pub struct SocketChannel {
     channel: TcpStream,
+    write_buf: Vec<u8>,
 }
 
 impl SocketChannel{
     pub fn new(channel:TcpStream) -> SocketChannel{
         SocketChannel{
-            channel
+            channel,
+            write_buf:Vec::new(),
         }
     }
 }
@@ -54,7 +56,8 @@ pub struct ServerChannel{
 impl ServerChannel {
     pub fn new(channel:TcpStream) -> SocketChannel{
         SocketChannel{
-            channel
+            channel,
+            write_buf:Vec::new(),
         }
     }
 }

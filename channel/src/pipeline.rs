@@ -31,10 +31,9 @@ impl Node{
         }
     }
 
-    fn into_element(self:Box<Self>) -> impl Handler{
+    fn into_element(self:Box<Self>) -> Box<dyn Handler>{
         self.handler
     }
 }
-
 
 
