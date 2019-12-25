@@ -3,8 +3,10 @@ use std::sync::mpsc::{Sender, channel};
 use std::thread::{Builder, Thread};
 
 struct ServerBootStrap {
-    sender: Option<Sender<Box<dyn FnOnce() -> ()>>>,
+    sender: Option<Task>,
 }
+
+type Task=Sender<Box<dyn FnOnce() -> ()>>;
 
 impl ServerBootStrap {
     fn new() -> ServerBootStrap {
