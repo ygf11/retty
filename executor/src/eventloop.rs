@@ -14,18 +14,20 @@ use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
+use std::future::Future;
 
-struct EventLoop {
+struct EventLoop<'a> {
     poll: Poll,
     events: Events,
-    thread: Builder,
+    thread: Option<&'a Thread>,
+    thread_builder: Builder,
     sender: Sender<Box<dyn Task>>,
     receiver: Receiver<Box<dyn Task>>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
-impl EventLoop {
-    fn new() -> EventLoop {
+impl<'a> EventLoop<'a> {
+    fn new() -> EventLoop<'a> {
         let poll = match Poll::new() {
             Ok(p) => p,
             Err(e) => panic!("create mio poll failed!"),
@@ -37,13 +39,19 @@ impl EventLoop {
             poll,
             sender,
             receiver,
+            thread: None,
             channels: HashMap::new(),
-            thread: Builder::new(),
+            thread_builder: Builder::new(),
             events: Events::with_capacity(128),
         }
     }
 
-    pub fn register(&mut self, channel: impl Channel) {}
+    pub fn register(&mut self, channel: impl Channel) -> Result<Sender<Box<dyn Task>>, &'static str> {
+        // 1. thread none => start thread
+        // 2. thread not none => add register task
+
+        Ok(self.sender.clone())
+    }
 
     /// private method
     fn deregister(&mut self) {}
@@ -56,21 +64,19 @@ impl EventLoop {
         loop {
             poll.poll(events, Some(Duration::from_millis(100)));
 
-            for event in events.iter(){
+            for event in events.iter() {
                 match event.token() {
-                    reader => if event.readiness().is_readable(){
+                    reader => if event.readiness().is_readable() {}
 
-                    }
-
-                    writer => if event.readiness().is_writable(){
-
-                    }
+                    writer => if event.readiness().is_writable() {}
                 }
+
+                // TODO handle tasks
             }
         }
     }
 
-    pub fn producer(&self) -> Sender<Box<dyn Task>>{
+    pub fn producer(&self) -> Sender<Box<dyn Task>> {
         self.sender.clone()
     }
 
@@ -79,7 +85,7 @@ impl EventLoop {
     }
 }
 
-trait Task{
+trait Task {
     fn run(&mut self);
 
     fn after(&mut self);

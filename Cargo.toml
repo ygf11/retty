@@ -3,5 +3,6 @@
 members = [
     "executor",
     "channel",
+    "common"
 ]
 

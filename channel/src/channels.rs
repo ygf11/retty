@@ -34,9 +34,11 @@ impl SocketChannel{
 
 impl Channel for SocketChannel{
     fn get(&self){
-        /// 1. read from tcp stream
-        /// 2. handle read events
-        /// 3. write into tcp stream
+        // 1. read from tcp stream
+        // 2. fire event in handler-chain
+        // 3. write into tcp stream
+        //
+        //
     }
 
     fn bind(&mut self){
