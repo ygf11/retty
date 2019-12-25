@@ -19,7 +19,7 @@ impl ServerBootStrap {
     }
 
     /// send msg to thread
-    fn bind(&mut self) {
+    fn bind(&mut self, address: &str) {
         let result = self.sender.take().or_else(|| {
             let (sender, receiver) = channel();
             let sender_clone = sender.clone();
@@ -32,8 +32,13 @@ impl ServerBootStrap {
 
             Some(sender)
         });
-
         self.sender = result;
+
+        // register
+        self.sender.as_ref().map(|sender|
+            sender.send(Box::new(|| {
+
+        })));
     }
 
     fn close(&mut self) {}

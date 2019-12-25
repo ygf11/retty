@@ -24,13 +24,12 @@ pub struct EventLoop {
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
-impl EventLoop{
-    pub fn new(sender: Sender<Task>, receiver: Receiver<Task>) -> EventLoop{
+impl EventLoop {
+    pub fn new(sender: Sender<Task>, receiver: Receiver<Task>) -> EventLoop {
         let poll = match Poll::new() {
             Ok(p) => p,
             Err(e) => panic!("create mio poll failed!"),
         };
-
 
         EventLoop {
             poll,
@@ -49,10 +48,11 @@ impl EventLoop{
 
     /// thread run loop
     pub fn run_loop(&mut self) {
-        let mut poll = &mut self.poll;
-        let mut events = &mut self.events;
-        let mut channels = &mut self.channels;
         loop {
+            let mut poll = &mut self.poll;
+            let mut events = &mut self.events;
+            let mut channels = &mut self.channels;
+
             poll.poll(events, Some(Duration::from_millis(100)));
 
             for event in events.iter() {
@@ -61,9 +61,12 @@ impl EventLoop{
 
                     writer => if event.readiness().is_writable() {}
                 }
-
-                // TODO handle tasks
             }
+
+            // TODO handle tasks
+            self.run_tasks();
+
+
         }
     }
 
@@ -73,6 +76,19 @@ impl EventLoop{
 
     pub fn execute(&mut self, task: Box<Task>) {
         self.sender.clone().send(task);
+    }
+
+    fn run_tasks(&mut self) {
+        let receiver = &mut self.receiver;
+        loop {
+            let task = receiver.try_recv();
+
+
+            match task {
+                Ok(task) => task(),
+                Err(_) => break,
+            }
+        }
     }
 }
 
