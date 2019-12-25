@@ -1,3 +1,5 @@
+extern crate executor;
+
 use std::mem;
 use std::sync::mpsc::{Sender, channel};
 use std::thread::{Builder, Thread};

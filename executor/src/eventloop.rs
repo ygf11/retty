@@ -17,11 +17,10 @@ use std::sync::mpsc::Receiver;
 use std::future::Future;
 use std::alloc::handle_alloc_error;
 
-struct EventLoop<'a> {
+pub struct EventLoop<'a> {
     poll: Poll,
     events: Events,
     thread: Option<&'a Thread>,
-    thread_builder: Builder,
     sender: Sender<Box<dyn FnOnce() -> () + Send>>,
     receiver: Receiver<Box<dyn FnOnce() -> () + Send>>,
     channels: HashMap<Token, Box<dyn Channel>>,
@@ -42,29 +41,12 @@ impl<'a> EventLoop<'a> {
             receiver,
             thread: None,
             channels: HashMap::new(),
-            thread_builder: Builder::new(),
             events: Events::with_capacity(128),
         }
     }
 
-    pub fn register<F>(&mut self)
-                       -> Result<Sender<Box<dyn FnOnce() -> () + Send>>, &'static str> {
-        // 1. thread none => start thread
-        // 2. thread not none => add register task
+    pub fn register<F>(&mut self) {
 
-        //let thread = self.thread.or_else(|| {
-        //    let result = self.thread_builder.spawn(|| {
-        //        self.run_loop();
-        //    });
-
-        //    result.or_else(|_| panic!("start thread failed."));
-
-        //   Some(result.unwrap().thread())
-        //});
-
-        //self.thread.or_else(|| thread);
-
-        Ok(self.sender.clone())
     }
 
     /// private method
