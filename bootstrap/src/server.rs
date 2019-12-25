@@ -1,4 +1,3 @@
-extern crate executor;
 
 use std::mem;
 use std::sync::mpsc::{Sender, channel};
