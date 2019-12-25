@@ -15,14 +15,15 @@ use std::sync::mpsc::channel;
 use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
 use std::future::Future;
+use std::alloc::handle_alloc_error;
 
 struct EventLoop<'a> {
     poll: Poll,
     events: Events,
     thread: Option<&'a Thread>,
     thread_builder: Builder,
-    sender: Sender<Box<dyn Task>>,
-    receiver: Receiver<Box<dyn Task>>,
+    sender: Sender<Box<dyn FnOnce() -> () + Send>>,
+    receiver: Receiver<Box<dyn FnOnce() -> () + Send>>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
@@ -46,9 +47,22 @@ impl<'a> EventLoop<'a> {
         }
     }
 
-    pub fn register(&mut self, channel: impl Channel) -> Result<Sender<Box<dyn Task>>, &'static str> {
+    pub fn register<F>(&mut self)
+                       -> Result<Sender<Box<dyn FnOnce() -> () + Send>>, &'static str> {
         // 1. thread none => start thread
         // 2. thread not none => add register task
+
+        //let thread = self.thread.or_else(|| {
+        //    let result = self.thread_builder.spawn(|| {
+        //        self.run_loop();
+        //    });
+
+        //    result.or_else(|_| panic!("start thread failed."));
+
+        //   Some(result.unwrap().thread())
+        //});
+
+        //self.thread.or_else(|| thread);
 
         Ok(self.sender.clone())
     }
@@ -76,11 +90,11 @@ impl<'a> EventLoop<'a> {
         }
     }
 
-    pub fn producer(&self) -> Sender<Box<dyn Task>> {
+    pub fn producer<F>(&self) -> Sender<Box<dyn FnOnce() -> () + Send>> {
         self.sender.clone()
     }
 
-    pub fn execute(&mut self, task: Box<dyn Task>) {
+    pub fn execute<F>(&mut self, task: Box<dyn FnOnce() -> () + Send>) {
         self.sender.clone().send(task);
     }
 }
