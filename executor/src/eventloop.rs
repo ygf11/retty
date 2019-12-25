@@ -8,52 +8,47 @@ use mio::Token;
 use mio::net::TcpListener;
 use channel::channels::Channel;
 use std::collections::HashMap;
-use std::thread::Thread;
-use std::thread::Builder;
+use std::thread::{Thread, Builder};
+use std::thread;
 use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
-use std::future::Future;
-use std::alloc::handle_alloc_error;
 
-pub struct EventLoop<'a> {
+pub struct EventLoop {
     poll: Poll,
     events: Events,
-    thread: Option<&'a Thread>,
-    sender: Sender<Box<dyn FnOnce() -> () + Send>>,
-    receiver: Receiver<Box<dyn FnOnce() -> () + Send>>,
+    thread: Thread,
+    sender: Sender<Task>,
+    receiver: Receiver<Task>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
-impl<'a> EventLoop<'a> {
-    fn new() -> EventLoop<'a> {
+impl EventLoop{
+    pub fn new(sender: Sender<Task>, receiver: Receiver<Task>) -> EventLoop{
         let poll = match Poll::new() {
             Ok(p) => p,
             Err(e) => panic!("create mio poll failed!"),
         };
 
-        let (sender, receiver) = channel();
 
         EventLoop {
             poll,
             sender,
             receiver,
-            thread: None,
+            thread: thread::current(),
             channels: HashMap::new(),
             events: Events::with_capacity(128),
         }
     }
 
-    pub fn register<F>(&mut self) {
-
-    }
+    pub fn register(&mut self) {}
 
     /// private method
     fn deregister(&mut self) {}
 
     /// thread run loop
-    fn run_loop(&mut self) {
+    pub fn run_loop(&mut self) {
         let mut poll = &mut self.poll;
         let mut events = &mut self.events;
         let mut channels = &mut self.channels;
@@ -72,17 +67,13 @@ impl<'a> EventLoop<'a> {
         }
     }
 
-    pub fn producer<F>(&self) -> Sender<Box<dyn FnOnce() -> () + Send>> {
+    pub fn producer(&self) -> Sender<Task> {
         self.sender.clone()
     }
 
-    pub fn execute<F>(&mut self, task: Box<dyn FnOnce() -> () + Send>) {
+    pub fn execute(&mut self, task: Box<Task>) {
         self.sender.clone().send(task);
     }
 }
 
-trait Task {
-    fn run(&mut self);
-
-    fn after(&mut self);
-}
+pub type Task = Box<dyn FnOnce() -> () + Send>;

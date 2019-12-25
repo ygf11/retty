@@ -1,13 +1,15 @@
+extern crate executor;
 
 use std::mem;
 use std::sync::mpsc::{Sender, channel};
 use std::thread::{Builder, Thread};
+use executor::eventloop::{EventLoop, Task};
+
 
 struct ServerBootStrap {
-    sender: Option<Task>,
+    sender: Option<Sender<Task>>,
 }
 
-type Task=Sender<Box<dyn FnOnce() -> ()>>;
 
 impl ServerBootStrap {
     fn new() -> ServerBootStrap {
@@ -20,9 +22,12 @@ impl ServerBootStrap {
     fn bind(&mut self) {
         let result = self.sender.take().or_else(|| {
             let (sender, receiver) = channel();
+            let sender_clone = sender.clone();
 
-            let builder = Builder::new().spawn(|| {
+            let builder = Builder::new().spawn(move || {
                 // init logic
+                let mut event_loop = EventLoop::new(sender_clone, receiver);
+                event_loop.run_loop();
             });
 
             Some(sender)
