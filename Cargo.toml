@@ -1,8 +1,10 @@
 [workspace]
 
 members = [
-    "executor",
     "channel",
-    "common"
+    "common",
+    "executor",
+    "bootstrap"
+
 ]
 
