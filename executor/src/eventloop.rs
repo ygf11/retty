@@ -19,13 +19,13 @@ pub struct EventLoop {
     poll: Poll,
     events: Events,
     thread: Thread,
-    sender: Sender<Task>,
-    receiver: Receiver<Task>,
+    sender: Sender<Message>,
+    receiver: Receiver<Message>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
 impl EventLoop {
-    pub fn new(sender: Sender<Task>, receiver: Receiver<Task>) -> EventLoop {
+    pub fn new(sender: Sender<Message>, receiver: Receiver<Message>) -> EventLoop {
         let poll = match Poll::new() {
             Ok(p) => p,
             Err(e) => panic!("create mio poll failed!"),
@@ -70,26 +70,31 @@ impl EventLoop {
         }
     }
 
-    pub fn producer(&self) -> Sender<Task> {
+    pub fn producer(&self) -> Sender<Message> {
         self.sender.clone()
     }
 
-    pub fn execute(&mut self, task: Box<Task>) {
+    pub fn execute(&mut self, task: Message) {
         self.sender.clone().send(task);
     }
 
     fn run_tasks(&mut self) {
         let receiver = &mut self.receiver;
         loop {
-            let task = receiver.try_recv();
+            let message= receiver.try_recv();
 
 
-            match task {
-                Ok(task) => task(),
+            match message {
+                Ok(task) => println!("message"),
                 Err(_) => break,
             }
         }
     }
 }
 
-pub type Task = Box<dyn FnOnce() -> () + Send>;
+pub enum Operation {
+    Bind(String),
+    Connect(String),
+}
+
+pub type Message = Operation;

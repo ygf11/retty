@@ -3,11 +3,12 @@ extern crate executor;
 use std::mem;
 use std::sync::mpsc::{Sender, channel};
 use std::thread::{Builder, Thread};
-use executor::eventloop::{EventLoop, Task};
+use executor::eventloop::EventLoop;
+use self::executor::eventloop::{Message, Operation};
 
 
 struct ServerBootStrap {
-    sender: Option<Sender<Task>>,
+    sender: Option<Sender<Message>>,
 }
 
 
@@ -35,10 +36,10 @@ impl ServerBootStrap {
         self.sender = result;
 
         // register
-        self.sender.as_ref().map(|sender|
-            sender.send(Box::new(|| {
-
-        })));
+        self.sender.as_ref().map(move|sender| {
+            let message = Operation::Bind(String::from(address));
+            sender.send(message);
+        });
     }
 
     fn close(&mut self) {}
