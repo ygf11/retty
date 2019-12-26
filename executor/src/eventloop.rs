@@ -88,10 +88,11 @@ impl EventLoop {
 
     fn run_remote_tasks(&mut self) {
         // remote
-        let receiver = self.receiver.take();
+        let receiver = self.receiver.take()
+            .expect("none receiver in eventloop.");
+
         loop {
-            let queue = &receiver.expect("none receiver in eventloop.");
-            match queue.try_recv() {
+            match receiver.try_recv() {
                 Ok(task) => self.run_remote_task(task),
                 Err(_) => break,
             }
