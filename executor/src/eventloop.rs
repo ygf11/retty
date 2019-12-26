@@ -98,19 +98,19 @@ impl EventLoop {
             }
         }
 
-        //self.receiver = receiver;
+        self.receiver = Some(receiver);
     }
 
     fn run_local_tasks(&mut self) {
         // local
-        let queue = self.task_queue.take();
-        queue.map(|queue| {
-            for task in queue.iter() {
-                self.run_local_task(task);
-            }
-        });
+        let queue = self.task_queue.take()
+            .expect("none task_queue in eventloop.");
 
-        self.task_queue = queue;
+        for task in queue.iter() {
+            self.run_local_task(task);
+        }
+
+        self.task_queue = Some(queue);
     }
 
     fn run_remote_task(&mut self, operation: Message) {
