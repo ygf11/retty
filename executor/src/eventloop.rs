@@ -10,6 +10,7 @@ use channel::channels::Channel;
 use std::collections::HashMap;
 use std::thread::{Thread, Builder};
 use std::thread;
+use std::mem;
 use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Sender;
@@ -21,8 +22,8 @@ pub struct EventLoop {
     events: Events,
     thread: Thread,
     sender: Sender<Message>,
-    receiver: Receiver<Message>,
-    task_queue: Vec<LocalTask>,
+    receiver: Option<Receiver<Message>>,
+    task_queue: Option<Vec<LocalTask>>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
@@ -37,8 +38,8 @@ impl EventLoop {
         EventLoop {
             poll,
             sender,
-            receiver,
-            task_queue: Vec::new(),
+            receiver: Some(receiver),
+            task_queue: Some(Vec::new()),
             thread: thread::current(),
             channels: HashMap::new(),
             events: Events::with_capacity(128),
@@ -81,25 +82,46 @@ impl EventLoop {
     }
 
     fn run_tasks(&mut self) {
-        let receiver = &mut self.receiver;
+        self.run_remote_tasks();
+        self.run_local_tasks();
+    }
+
+    fn run_remote_tasks(&mut self) {
+        // remote
+        let receiver = self.receiver.take();
         loop {
-            let message = receiver.try_recv();
-
-
-            match message {
-                Ok(task) => println!("message"),
+            let queue = &receiver.expect("none receiver in eventloop.");
+            match queue.try_recv() {
+                Ok(task) => self.run_remote_task(task),
                 Err(_) => break,
             }
         }
+
+        //self.receiver = receiver;
     }
 
-    /*fn run_task(&mut self, operation: Message) {
-        match operation{
+    fn run_local_tasks(&mut self) {
+        // local
+        let queue = self.task_queue.take();
+        queue.map(|queue| {
+            for task in queue.iter() {
+                self.run_local_task(task);
+            }
+        });
+
+        self.task_queue = queue;
+    }
+
+    fn run_remote_task(&mut self, operation: Message) {
+        match operation {
             Operation::Bind(address) => println!(""),
             Operation::Connect(address) => println!(""),
-            Operation::Accept(socket) => println!(""),
         }
-    }*/
+    }
+
+    fn run_local_task(&mut self, task: &LocalTask) {
+        // run local task
+    }
 }
 
 pub enum Operation {
