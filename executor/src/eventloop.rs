@@ -14,6 +14,7 @@ use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
+use self::channel::channels::SocketChannel;
 
 pub struct EventLoop {
     poll: Poll,
@@ -21,8 +22,10 @@ pub struct EventLoop {
     thread: Thread,
     sender: Sender<Message>,
     receiver: Receiver<Message>,
+    task_queue: Vec<LocalTask>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
+
 
 impl EventLoop {
     pub fn new(sender: Sender<Message>, receiver: Receiver<Message>) -> EventLoop {
@@ -35,6 +38,7 @@ impl EventLoop {
             poll,
             sender,
             receiver,
+            task_queue: Vec::new(),
             thread: thread::current(),
             channels: HashMap::new(),
             events: Events::with_capacity(128),
@@ -65,8 +69,6 @@ impl EventLoop {
 
             // TODO handle tasks
             self.run_tasks();
-
-
         }
     }
 
@@ -81,7 +83,7 @@ impl EventLoop {
     fn run_tasks(&mut self) {
         let receiver = &mut self.receiver;
         loop {
-            let message= receiver.try_recv();
+            let message = receiver.try_recv();
 
 
             match message {
@@ -90,11 +92,24 @@ impl EventLoop {
             }
         }
     }
+
+    /*fn run_task(&mut self, operation: Message) {
+        match operation{
+            Operation::Bind(address) => println!(""),
+            Operation::Connect(address) => println!(""),
+            Operation::Accept(socket) => println!(""),
+        }
+    }*/
 }
 
 pub enum Operation {
     Bind(String),
     Connect(String),
 }
+
+pub struct LocalTask {
+    channel: SocketChannel,
+}
+
 
 pub type Message = Operation;
