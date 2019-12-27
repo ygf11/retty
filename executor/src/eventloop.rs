@@ -127,13 +127,21 @@ impl EventLoop {
             Operation::Bind(address, handlers) => {
                 let server = ServerChannel::new(address, handlers);
 
-                match server{
+                match server {
                     Ok(channel) => self.register(Box::new(channel)),
-                    Err(e) => println!("{:?}",e),
+                    Err(e) => println!("{:?}", e),
                 }
-            },
+            }
 
-            Operation::Connect(address, handlers) => println!(""),
+            Operation::Connect(address, handlers) => {
+                let client = TcpStream::connect(&address);
+
+                match client {
+                    Ok(channel) =>
+                        self.register(Box::new(SocketChannel::new(channel, handlers))),
+                    Err(e) => println!("{:?}", e)
+                }
+            }
         }
     }
 

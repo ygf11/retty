@@ -26,11 +26,14 @@ pub struct SocketChannel {
 }
 
 impl SocketChannel {
-    pub fn new(channel: TcpStream) -> SocketChannel {
+    pub fn new(channel: TcpStream, handlers:Vec<Box<dyn Handler + Send>>) -> SocketChannel {
+        let mut pipeline = PipeLine::new();
+        pipeline.add_all(handlers);
+
         SocketChannel {
             channel,
+            pipeline,
             write_buf: Vec::new(),
-            pipeline: PipeLine::new(),
         }
     }
 }
