@@ -17,6 +17,7 @@ use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
 use self::channel::channels::{SocketChannel, ServerChannel};
 use crate::token::Tokens;
+use self::channel::handlers::Handler;
 
 pub struct EventLoop {
     poll: Poll,
@@ -125,13 +126,13 @@ impl EventLoop {
     }
 
     fn run_remote_task(&mut self, operation: Message) {
-        match operation {
-            Operation::Bind(address) => println!(""),
+        //match operation {
+            //Operation::Bind(address) => println!(""),
                 //{
                 //let channel = Box::new(ServerChannel::new())
             //},
-            Operation::Connect(address) => println!(""),
-        }
+            //Operation::Connect(address) => println!(""),
+        //}
     }
 
     fn run_local_task(&mut self, task: &LocalTask) {
@@ -146,8 +147,8 @@ impl EventLoop {
 }
 
 pub enum Operation {
-    Bind(String),
-    Connect(String),
+    Bind(String, Vec<Box<dyn Handler + Send>>),
+    Connect(String, Vec<Box<dyn Handler + Send>>),
 }
 
 pub struct LocalTask {
