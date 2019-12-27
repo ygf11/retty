@@ -16,9 +16,11 @@ use std::sync::mpsc::channel;
 use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
 use self::channel::channels::SocketChannel;
+use crate::token::Tokens;
 
 pub struct EventLoop {
     poll: Poll,
+    tokens: Tokens,
     events: Events,
     thread: Thread,
     sender: Sender<Message>,
@@ -38,6 +40,7 @@ impl EventLoop {
         EventLoop {
             poll,
             sender,
+            tokens: Tokens::new(),
             receiver: Some(receiver),
             task_queue: Some(Vec::new()),
             thread: thread::current(),
@@ -46,8 +49,9 @@ impl EventLoop {
         }
     }
 
-    pub fn register(&mut self, channel:impl Channel) {
-
+    pub fn register(&mut self, channel: Box<dyn Channel>) {
+        let token = self.next_token();
+        self.channels.insert(token, channel);
     }
 
     /// private method
@@ -124,6 +128,12 @@ impl EventLoop {
 
     fn run_local_task(&mut self, task: &LocalTask) {
         // run local task
+        // let channel = task.channel;
+    }
+
+    fn next_token(&mut self) -> Token{
+        // TODO UNIQUE
+        self.tokens.next()
     }
 }
 
@@ -133,7 +143,7 @@ pub enum Operation {
 }
 
 pub struct LocalTask {
-    channel: SocketChannel,
+    channel: Option<SocketChannel>,
 }
 
 

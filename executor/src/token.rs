@@ -1,6 +1,6 @@
 use mio::Token;
 
-struct Tokens {
+pub struct Tokens {
     num: usize,
 }
 
