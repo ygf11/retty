@@ -1,8 +1,10 @@
-use std::net::{TcpStream, TcpListener};
+use mio::net::{TcpStream, TcpListener};
 use self::super::pipeline::PipeLine;
+use self::super::handlers::Handler;
+use std::net::SocketAddr;
 
 /// channel trait
-pub trait Channel{
+pub trait Channel {
     fn get(&self);
 
     fn bind(&mut self);
@@ -22,18 +24,18 @@ pub struct SocketChannel {
     pipeline: PipeLine,
 }
 
-impl SocketChannel{
-    pub fn new(channel:TcpStream) -> SocketChannel{
-        SocketChannel{
+impl SocketChannel {
+    pub fn new(channel: TcpStream) -> SocketChannel {
+        SocketChannel {
             channel,
-            write_buf:Vec::new(),
+            write_buf: Vec::new(),
             pipeline: PipeLine::new(),
         }
     }
 }
 
-impl Channel for SocketChannel{
-    fn get(&self){
+impl Channel for SocketChannel {
+    fn get(&self) {
         // 1. read from tcp stream
         // 2. fire event in handler-chain
         // 3. write into tcp stream
@@ -41,56 +43,47 @@ impl Channel for SocketChannel{
         //
     }
 
-    fn bind(&mut self){
-
+    fn bind(&mut self) {
+        // unsupport
     }
 
-    fn connect(&mut self){
+    fn connect(&mut self) {}
 
-    }
+    fn read(&self) {}
 
-    fn read(&self){
-
-    }
-
-    fn write(&self){
-
-    }
+    fn write(&self) {}
 }
 
-pub struct ServerChannel{
+pub struct ServerChannel {
     channel: TcpListener,
-    pipeline:PipeLine,
+    pipeline: PipeLine,
 }
 
 impl ServerChannel {
-    pub fn new(channel:TcpListener) -> ServerChannel{
-        ServerChannel{
-            channel,
-            pipeline:PipeLine::new(),
-        }
+    pub fn new(address: &SocketAddr, handlers:Vec<Box<dyn Handler>>) -> Result<ServerChannel, &'static str> {
+        let socket = TcpListener::bind(address)
+            .or_else(|err| Err("bind failed."))?;
+
+        let result = ServerChannel {
+            channel: socket,
+            pipeline: PipeLine::new(),
+        };
+
+        Ok(result)
     }
 }
 
 
-impl Channel for ServerChannel{
-    fn get(&self){
+impl Channel for ServerChannel {
+    fn get(&self) {}
 
+    fn bind(&mut self) {}
+
+    fn connect(&mut self) {
+        // unsupport
     }
 
-    fn bind(&mut self){
+    fn read(&self) {}
 
-    }
-
-    fn connect(&mut self){
-
-    }
-
-    fn read(&self){
-
-    }
-
-    fn write(&self){
-
-    }
+    fn write(&self) {}
 }

@@ -11,7 +11,7 @@ use self::channel::handlers::Handler;
 
 struct ServerBootStrap {
     sender: Option<Sender<Message>>,
-    handlers: Vec<Box<dyn Handler + Send>>,
+    handlers: Option<Vec<Box<dyn Handler + Send>>>,
 }
 
 
@@ -19,12 +19,13 @@ impl ServerBootStrap {
     fn new() -> ServerBootStrap {
         ServerBootStrap {
             sender: None,
-            handlers:Vec::new(),
+            handlers: Some(Vec::new()),
         }
     }
 
-    fn add_last(&mut self, handler: Box<dyn Handler + Send>){
-        self.handlers.push(handler);
+    fn add_last(&mut self, handler: Box<dyn Handler + Send>) {
+        self.handlers.as_mut().map(|handlers|
+            { handlers.push(handler) });
     }
 
     /// send msg to thread
@@ -43,10 +44,12 @@ impl ServerBootStrap {
         });
         self.sender = result;
 
+        let handlers = self.handlers.take();
         // register
-        self.sender.as_ref().map(move|sender| {
-            //let message = Operation::Bind(String::from(address));
-            //sender.send(message);
+        self.sender.as_ref().map(move |sender| {
+            let handlers = handlers.expect("handlers is None.");
+            let message = Operation::Bind(String::from(address), handlers);
+            sender.send(message);
         });
     }
 

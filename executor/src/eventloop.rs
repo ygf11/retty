@@ -70,13 +70,9 @@ impl EventLoop {
             for event in events.iter() {
                 match event.token() {
                     //read and accept
-                    reader => if event.readiness().is_readable() {
+                    reader => if event.readiness().is_readable() {},
 
-                    },
-
-                    writer => if event.readiness().is_writable() {
-
-                    }
+                    writer => if event.readiness().is_writable() {}
                 }
             }
 
@@ -126,13 +122,13 @@ impl EventLoop {
     }
 
     fn run_remote_task(&mut self, operation: Message) {
-        //match operation {
-            //Operation::Bind(address) => println!(""),
-                //{
-                //let channel = Box::new(ServerChannel::new())
+        match operation {
+            Operation::Bind(address, handlers) => println!(""),
+            //{
+            //let channel = Box::new(ServerChannel::new())
             //},
-            //Operation::Connect(address) => println!(""),
-        //}
+            Operation::Connect(address, handlers) => println!(""),
+        }
     }
 
     fn run_local_task(&mut self, task: &LocalTask) {
@@ -140,7 +136,7 @@ impl EventLoop {
         // let channel = task.channel;
     }
 
-    fn next_token(&mut self) -> Token{
+    fn next_token(&mut self) -> Token {
         // TODO UNIQUE
         self.tokens.next()
     }
