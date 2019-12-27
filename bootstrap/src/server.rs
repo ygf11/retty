@@ -7,6 +7,7 @@ use std::thread::{Builder, Thread};
 use executor::eventloop::EventLoop;
 use self::executor::eventloop::{Message, Operation};
 use self::channel::handlers::Handler;
+use std::net::SocketAddr;
 
 
 struct ServerBootStrap {
@@ -29,7 +30,7 @@ impl ServerBootStrap {
     }
 
     /// send msg to thread
-    fn bind(&mut self, address: &str) {
+    fn bind(&mut self, addr: SocketAddr) {
         let result = self.sender.take().or_else(|| {
             let (sender, receiver) = channel();
             let sender_clone = sender.clone();
@@ -48,7 +49,7 @@ impl ServerBootStrap {
         // register
         self.sender.as_ref().map(move |sender| {
             let handlers = handlers.expect("handlers is None.");
-            let message = Operation::Bind(String::from(address), handlers);
+            let message = Operation::Bind(addr, handlers);
             sender.send(message);
         });
     }

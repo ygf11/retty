@@ -60,14 +60,19 @@ pub struct ServerChannel {
 }
 
 impl ServerChannel {
-    pub fn new(address: &SocketAddr, handlers:Vec<Box<dyn Handler>>) -> Result<ServerChannel, &'static str> {
-        let socket = TcpListener::bind(address)
-            .or_else(|err| Err("bind failed."))?;
+    pub fn new(address: SocketAddr,
+               handlers: Vec<Box<dyn Handler + Send>>)
+               -> Result<ServerChannel, &'static str> {
+
+        let socket = TcpListener::bind(&address).
+            or_else(|err| Err("bind failed."))?;
 
         let result = ServerChannel {
             channel: socket,
             pipeline: PipeLine::new(),
         };
+
+        // TODO add handler to pipeline
 
         Ok(result)
     }
