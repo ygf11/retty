@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 executor = {path = "../executor"}
+channel = { path="../channel" }

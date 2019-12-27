@@ -15,7 +15,7 @@ use std::time::Duration;
 use std::sync::mpsc::channel;
 use std::sync::mpsc::Sender;
 use std::sync::mpsc::Receiver;
-use self::channel::channels::SocketChannel;
+use self::channel::channels::{SocketChannel, ServerChannel};
 use crate::token::Tokens;
 
 pub struct EventLoop {
@@ -68,9 +68,14 @@ impl EventLoop {
 
             for event in events.iter() {
                 match event.token() {
-                    reader => if event.readiness().is_readable() {}
+                    //read and accept
+                    reader => if event.readiness().is_readable() {
 
-                    writer => if event.readiness().is_writable() {}
+                    },
+
+                    writer => if event.readiness().is_writable() {
+
+                    }
                 }
             }
 
@@ -122,6 +127,9 @@ impl EventLoop {
     fn run_remote_task(&mut self, operation: Message) {
         match operation {
             Operation::Bind(address) => println!(""),
+                //{
+                //let channel = Box::new(ServerChannel::new())
+            //},
             Operation::Connect(address) => println!(""),
         }
     }
