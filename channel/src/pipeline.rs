@@ -1,4 +1,5 @@
 use self::super::handlers::Handler;
+use std::ops::Deref;
 
 /// channel pipeline
 pub struct PipeLine {
@@ -12,10 +13,11 @@ impl PipeLine {
             head: None,
             tail: None,
         }
+
     }
 
     /// add last
-    pub fn add_last(&mut self, handler: Box<dyn Handler>) {
+    pub fn add_last(&mut self, handler: Box<dyn Handler + Send>) {
         unsafe {
             let mut node = Box::new(Node::new(handler));
             node.next = None;
@@ -32,6 +34,14 @@ impl PipeLine {
         }
     }
 
+    pub fn add_all(&mut self, handlers: Vec<Box<dyn Handler + Send>>){
+        let mut handlers = handlers;
+        let size = handlers.len();
+        for handler in 0..size{
+            self.add_last(handlers.remove(0))
+        }
+    }
+
     /// iterate from head
     pub fn iter_from_head(&mut self) {
         let mut cur = self.get_head();
@@ -42,9 +52,9 @@ impl PipeLine {
     }
 
     /// iterate from tail
-    pub fn iter_from_tail(&mut self){
+    pub fn iter_from_tail(&mut self) {
         let mut cur = self.get_tail();
-        while let Some(node) = cur{
+        while let Some(node) = cur {
             // TODO add handle()
             cur = self.get_node(node.prev);
         }
@@ -66,12 +76,11 @@ impl PipeLine {
         }
     }
 
-    fn get_node(&self, node:Option<*mut Node>) -> Option<Box<Node>>{
-        unsafe{
+    fn get_node(&self, node: Option<*mut Node>) -> Option<Box<Node>> {
+        unsafe {
             node.map(|node| {
                 Box::from_raw(node)
             })
-
         }
     }
 }

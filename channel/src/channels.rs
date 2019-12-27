@@ -2,6 +2,7 @@ use mio::net::{TcpStream, TcpListener};
 use self::super::pipeline::PipeLine;
 use self::super::handlers::Handler;
 use std::net::SocketAddr;
+use std::borrow::BorrowMut;
 
 /// channel trait
 pub trait Channel {
@@ -65,14 +66,15 @@ impl ServerChannel {
                -> Result<ServerChannel, &'static str> {
 
         let socket = TcpListener::bind(&address).
-            or_else(|err| Err("bind failed."))?;
+            map_err(|err| "bind failed.")?;
+
+        let mut pipeline = PipeLine::new();
+        pipeline.add_all(handlers);
 
         let result = ServerChannel {
+            pipeline,
             channel: socket,
-            pipeline: PipeLine::new(),
         };
-
-        // TODO add handler to pipeline
 
         Ok(result)
     }
