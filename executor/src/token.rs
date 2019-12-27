@@ -1,23 +1,30 @@
 use mio::Token;
 
-struct Tokens{
-    num:usize,
+struct Tokens {
+    num: usize,
 }
 
 impl Tokens {
     pub fn new() -> Tokens {
         Tokens {
-            num: 0
+            num: usize::min_value(),
         }
     }
 
     pub fn next(&mut self) -> Token {
-        // self.count().clone()
-        let mut count = self.count;
+
+        let mut count = self.num;
+        // avoid over flow
+        if count == usize::max_value() {
+            count = usize::min_value();
+        }
+
+        let token = Token(count);
+
         count = count + 1;
 
-        self.count = count;
+        self.num = count;
 
-        Token(count)
+        token
     }
 }
