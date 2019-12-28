@@ -17,6 +17,9 @@ pub trait Channel {
 
     /// callback
     fn write(&self);
+
+    /// register interested
+    fn register(&self);
 }
 
 pub struct SocketChannel {
@@ -56,6 +59,8 @@ impl Channel for SocketChannel {
     fn read(&self) {}
 
     fn write(&self) {}
+
+    fn register(&self){}
 }
 
 pub struct ServerChannel {
@@ -96,4 +101,8 @@ impl Channel for ServerChannel {
     fn read(&self) {}
 
     fn write(&self) {}
+
+    fn register(self){
+
+    }
 }
