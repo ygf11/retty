@@ -105,5 +105,8 @@ impl Channel for ServerChannel {
 
     fn write(&self) {}
 
-    fn register(&self, poll: Poll, token: Token) {}
+    fn register(&self, poll: Poll, token: Token) {
+        poll.register(&self.channel, token,
+                      Ready::readable() | Ready::writable(), PollOpt::edge());
+    }
 }
