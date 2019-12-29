@@ -52,7 +52,7 @@ impl EventLoop {
     }
 
     pub fn register(&mut self, channel: Box<dyn Channel>) {
-        self.poll.register()
+        // self.poll.register()
         let token = self.next_token();
         self.channels.insert(token, channel);
         // register read/write event
