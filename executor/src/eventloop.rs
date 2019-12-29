@@ -52,10 +52,12 @@ impl EventLoop {
     }
 
     pub fn register(&mut self, channel: Box<dyn Channel>) {
-        // self.poll.register()
         let token = self.next_token();
         self.channels.insert(token, channel);
+
         // register read/write event
+        self.channels.get(&token).map(|channel|
+            channel.register(&self.poll, token));
     }
 
     /// private method
@@ -64,9 +66,9 @@ impl EventLoop {
     /// thread run loop
     pub fn run_loop(&mut self) {
         loop {
-            let mut poll = &mut self.poll;
-            let mut events = &mut self.events;
-            let mut channels = &mut self.channels;
+            let poll = &mut self.poll;
+            let events = &mut self.events;
+            let channels = &mut self.channels;
 
             poll.poll(events, Some(Duration::from_millis(100)));
 

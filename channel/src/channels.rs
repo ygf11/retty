@@ -20,7 +20,7 @@ pub trait Channel {
     fn write(&self);
 
     /// register interested
-    fn register(&self, poll: Poll, token: Token);
+    fn register(&self, poll: &Poll, token: Token);
 }
 
 pub struct SocketChannel {
@@ -61,7 +61,7 @@ impl Channel for SocketChannel {
 
     fn write(&self) {}
 
-    fn register(&self, poll: Poll, token: Token) {
+    fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
     }
@@ -105,7 +105,7 @@ impl Channel for ServerChannel {
 
     fn write(&self) {}
 
-    fn register(&self, poll: Poll, token: Token) {
+    fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
     }
