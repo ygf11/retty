@@ -13,7 +13,6 @@ impl PipeLine {
             head: None,
             tail: None,
         }
-
     }
 
     /// add last
@@ -34,10 +33,10 @@ impl PipeLine {
         }
     }
 
-    pub fn add_all(&mut self, handlers: Vec<Box<dyn Handler + Send>>){
+    pub fn add_all(&mut self, handlers: Vec<Box<dyn Handler + Send>>) {
         let mut handlers = handlers;
         let size = handlers.len();
-        for handler in 0..size{
+        for handler in 0..size {
             self.add_last(handlers.remove(0))
         }
     }
@@ -47,6 +46,7 @@ impl PipeLine {
         let mut cur = self.get_head();
         while let Some(node) = cur {
             // TODO add handle()
+            node.handler.fire_channel_read();
             cur = self.get_node(node.next);
         }
     }
@@ -102,5 +102,21 @@ impl Node {
 
     fn into_element(self: Box<Self>) -> Box<dyn Handler> {
         self.handler
+    }
+}
+
+enum EventType {
+    READ,
+    WRITE,
+    REGISTER,
+    DEREGISTER,
+}
+
+fn handle(node: Box<Node>, event_type: EventType) {
+    match event_type {
+        EventType::READ => node.handler.fire_channel_read(),
+        EventType::WRITE => node.handler.fire_channel_write(),
+        EventType::REGISTER => node.handler.fire_channel_registered(),
+        EventType::DEREGISTER => node.handler.fire_channel_deregsiter(),
     }
 }

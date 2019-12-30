@@ -128,6 +128,7 @@ impl EventLoop {
 
     fn run_remote_task(&mut self, operation: Message) {
         match operation {
+            // bind
             Operation::Bind(address, handlers) => {
                 let server = ServerChannel::new(address, handlers);
 
@@ -137,6 +138,7 @@ impl EventLoop {
                 }
             }
 
+            // connect
             Operation::Connect(address, handlers) => {
                 let client = TcpStream::connect(&address);
 
