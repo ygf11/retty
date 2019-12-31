@@ -121,6 +121,14 @@ impl Node {
         });
     }
 
+    fn fire_channel_write<T>(&self, message: Message<T>) {
+        let next = self.get_next();
+        next.map(|node| {
+            node.fire_channel_write(message)
+        });
+    }
+
+
 
 }
 
