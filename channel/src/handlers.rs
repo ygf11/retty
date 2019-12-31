@@ -1,11 +1,13 @@
-pub trait Handler {
-    fn fire_channel_read(&self);
+use crate::pipeline::Message;
 
-    fn fire_channel_write(&self);
+pub trait Handler<T,R> {
+    fn fire_channel_read<T, R>(&self, data: Message<T>) -> Message<R>;
 
-    fn fire_channel_registered(&self);
+    fn fire_channel_write<T, R>(&self, data: Message<T>) -> Message<R>;
 
-    fn fire_channel_deregsiter(&self);
+    fn fire_channel_registered<T>(&self) -> Message<T>;
+
+    fn fire_channel_deregsiter<T>(&self) -> Message<T>;
 
     fn fire_next_read(&self);
 

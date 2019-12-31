@@ -1,5 +1,6 @@
 use self::super::handlers::Handler;
 use std::ops::Deref;
+use std::panic::resume_unwind;
 
 /// channel pipeline
 pub struct PipeLine {
@@ -70,7 +71,7 @@ impl PipeLine {
     pub fn fire_channel_deregistered(&mut self) {
         let mut cur = self.get_head();
         let message = Message::<u8>::empty(true);
-        let event_type = EventType::REGISTER;
+        let event_type = EventType::DEREGISTER;
         cur.map(|node| handle(&node, message, &event_type));
     }
 
@@ -137,12 +138,12 @@ impl Node {
 
 
     fn fire_channel_read<T>(&self, message: Message<T>) {
-        self.handler.fire_channel_read();
+        let result = self.handler.fire_channel_read(message);
 
-        if self.handler.need_fire_next() {
+        if result.propagate {
             let next = self.get_next();
             next.map(|node| {
-                node.fire_channel_read(message)
+                node.fire_channel_read(result)
             });
         }
 
@@ -150,9 +151,9 @@ impl Node {
     }
 
     fn fire_channel_write<T>(&self, message: Message<T>) {
-        self.handler.fire_channel_write();
+        let result = self.handler.fire_channel_write(message);
 
-        if self.handler.need_fire_next() {
+        if result.propagate {
             let next = self.get_prev();
             next.map(|node| {
                 node.fire_channel_write(message)
@@ -163,9 +164,9 @@ impl Node {
     }
 
     fn fire_channel_registered(&self) {
-        self.handler.fire_channel_registered();
+        let result = self.handler.fire_channel_registered();
 
-        if self.handler.need_fire_next() {
+        if result.propagate {
             let next = self.get_next();
             next.map(|node| {
                 node.fire_channel_registered()
@@ -176,9 +177,9 @@ impl Node {
     }
 
     fn fire_channel_deregistered(&self) {
-        self.handler.fire_channel_deregsiter();
+        let result = self.handler.fire_channel_deregsiter();
 
-        if self.handler.need_fire_next() {
+        if result.propagate {
             let next = self.get_next();
             next.map(|node| {
                 node.fire_channel_deregistered()
