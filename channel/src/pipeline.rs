@@ -59,7 +59,15 @@ impl PipeLine {
     }
 
     /// iterate from head
-    pub fn fire_channel_register(&mut self) {
+    pub fn fire_channel_registered(&mut self) {
+        let mut cur = self.get_head();
+        let message = Message::<u8>::empty();
+        let event_type = EventType::REGISTER;
+        cur.map(|node| handle(&node, message, &event_type));
+    }
+
+    /// iterate from head
+    pub fn fire_channel_deregistered(&mut self) {
         let mut cur = self.get_head();
         let message = Message::<u8>::empty();
         let event_type = EventType::REGISTER;
@@ -154,18 +162,32 @@ impl Node {
         self.handler.reset();
     }
 
-    fn fire_channel_register(&self) {
+    fn fire_channel_registered(&self) {
         self.handler.fire_channel_registered();
 
         if self.handler.need_fire_next() {
             let next = self.get_next();
             next.map(|node| {
-                node.fire_channel_register()
+                node.fire_channel_registered()
             });
         }
 
         self.handler.reset();
     }
+
+    fn fire_channel_deregistered(&self) {
+        self.handler.fire_channel_deregsiter();
+
+        if self.handler.need_fire_next() {
+            let next = self.get_next();
+            next.map(|node| {
+                node.fire_channel_deregistered()
+            });
+        }
+
+        self.handler.reset();
+    }
+
 }
 
 pub enum EventType {
