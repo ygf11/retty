@@ -8,6 +8,7 @@ pub struct PipeLine {
     tail: Option<*mut Node>,
 }
 
+/// TODO replace linked list with handler array
 impl PipeLine {
     pub fn new() -> PipeLine {
         PipeLine {
