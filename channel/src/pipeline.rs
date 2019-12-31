@@ -44,9 +44,10 @@ impl PipeLine {
     /// iterate from head
     pub fn iter_from_head(&mut self, msg: Vec<u8>, event_type: EventType) {
         let mut cur = self.get_head();
+        let message = Message::new(msg);
         while let Some(node) = cur {
             // TODO add handle()
-            // handle(&node, msg, &event_type);
+            handle(&node, message, &event_type);
             cur = self.get_node(node.next);
         }
     }
@@ -112,7 +113,7 @@ pub enum EventType {
     DEREGISTER,
 }
 
-fn handle(node: &Box<Node>, msg: Vec<u8>, event_type: &EventType) {
+fn handle<T>(node: &Box<Node>, msg: Message<T>, event_type: &EventType){
     match event_type {
         EventType::READ => node.handler.fire_channel_read(),
         EventType::WRITE => node.handler.fire_channel_write(),
