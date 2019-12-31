@@ -104,6 +104,10 @@ impl Node {
     fn into_element(self: Box<Self>) -> Box<dyn Handler> {
         self.handler
     }
+
+    fn fire_channel_read<T>(&self, message:Message<T>) {
+
+    }
 }
 
 pub enum EventType {
