@@ -42,20 +42,20 @@ impl PipeLine {
     }
 
     /// iterate from head
-    pub fn fire_channel_read(&mut self, msg: Vec<u8>, event_type: EventType) {
+    pub fn fire_channel_read(&mut self, msg: Vec<u8>) {
         let mut cur = self.get_head();
         let message = Message::new(msg);
-
+        let event_type = EventType::READ;
         cur.map(|node| handle(&node, message, &event_type));
     }
 
     /// iterate from tail
-    pub fn iter_from_tail(&mut self) {
+    pub fn fire_channel_write(&mut self, msg:Vec<u8>, event_type:EventType) {
         let mut cur = self.get_tail();
-        while let Some(node) = cur {
-            // TODO add handle()
-            cur = self.get_node(node.prev);
-        }
+        let message = Message::new(msg);
+
+        let event_type = EventType::WRITE;
+        cur.map(|node| handle(&node, message, &event_type));
     }
 
     fn get_head(&mut self) -> Option<Box<Node>> {
