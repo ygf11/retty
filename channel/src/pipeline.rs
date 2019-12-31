@@ -115,10 +115,16 @@ impl Node {
 
 
     fn fire_channel_read<T>(&self, message: Message<T>) {
-        let next = self.get_next();
-        next.map(|node| {
-            node.fire_channel_read(message)
-        });
+        self.handler.fire_channel_read();
+
+        if self.handler.need_fire_next(){
+            let next = self.get_next();
+            next.map(|node| {
+                node.fire_channel_read(message)
+            });
+        }
+
+        self.handler.reset();
     }
 
     fn fire_channel_write<T>(&self, message: Message<T>) {
@@ -127,8 +133,6 @@ impl Node {
             node.fire_channel_write(message)
         });
     }
-
-
 
 }
 
@@ -141,8 +145,8 @@ pub enum EventType {
 
 fn handle<T>(node: &Box<Node>, msg: Message<T>, event_type: &EventType) {
     match event_type {
-        EventType::READ => node.handler.fire_channel_read(),
-        EventType::WRITE => node.handler.fire_channel_write(),
+        EventType::READ => node.fire_channel_read(msg),
+        EventType::WRITE => node.fire_channel_write(msg),
         EventType::REGISTER => node.handler.fire_channel_registered(),
         EventType::DEREGISTER => node.handler.fire_channel_deregsiter(),
     }
