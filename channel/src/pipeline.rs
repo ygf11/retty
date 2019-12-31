@@ -42,14 +42,11 @@ impl PipeLine {
     }
 
     /// iterate from head
-    pub fn iter_from_head(&mut self, msg: Vec<u8>, event_type: EventType) {
+    pub fn fire_channel_read(&mut self, msg: Vec<u8>, event_type: EventType) {
         let mut cur = self.get_head();
         let message = Message::new(msg);
-        while let Some(node) = cur {
-            // TODO add handle()
-            // handle(&node, message, &event_type);
-            cur = self.get_node(node.next);
-        }
+
+        cur.map(|node| handle(&node, message, &event_type));
     }
 
     /// iterate from tail
@@ -117,7 +114,7 @@ impl Node {
     fn fire_channel_read<T>(&self, message: Message<T>) {
         self.handler.fire_channel_read();
 
-        if self.handler.need_fire_next(){
+        if self.handler.need_fire_next() {
             let next = self.get_next();
             next.map(|node| {
                 node.fire_channel_read(message)
@@ -130,7 +127,7 @@ impl Node {
     fn fire_channel_write<T>(&self, message: Message<T>) {
         self.handler.fire_channel_write();
 
-        if self.handler.need_fire_next(){
+        if self.handler.need_fire_next() {
             let next = self.get_next();
             next.map(|node| {
                 node.fire_channel_write(message)
@@ -139,7 +136,6 @@ impl Node {
 
         self.handler.reset();
     }
-
 }
 
 pub enum EventType {
