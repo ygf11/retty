@@ -50,13 +50,22 @@ impl PipeLine {
     }
 
     /// iterate from tail
-    pub fn fire_channel_write(&mut self, msg:Vec<u8>, event_type:EventType) {
+    pub fn fire_channel_write(&mut self, msg: Vec<u8>, event_type: EventType) {
         let mut cur = self.get_tail();
         let message = Message::new(msg);
 
         let event_type = EventType::WRITE;
         cur.map(|node| handle(&node, message, &event_type));
     }
+
+    /// iterate from head
+    pub fn fire_channel_register(&mut self) {
+        let mut cur = self.get_head();
+        let message = Message::<u8>::empty();
+        let event_type = EventType::REGISTER;
+        cur.map(|node| handle(&node, message, &event_type));
+    }
+
 
     fn get_head(&mut self) -> Option<Box<Node>> {
         unsafe {
@@ -110,7 +119,7 @@ impl Node {
         }
     }
 
-    fn get_prev(&self) -> Option<Box<Node>>{
+    fn get_prev(&self) -> Option<Box<Node>> {
         unsafe {
             self.prev.map(|node| {
                 Box::from_raw(node)
@@ -144,6 +153,19 @@ impl Node {
 
         self.handler.reset();
     }
+
+    fn fire_channel_register(&self) {
+        self.handler.fire_channel_registered();
+
+        if self.handler.need_fire_next() {
+            let next = self.get_next();
+            next.map(|node| {
+                node.fire_channel_register()
+            });
+        }
+
+        self.handler.reset();
+    }
 }
 
 pub enum EventType {
@@ -170,6 +192,12 @@ impl<T> Message<T> {
     fn new(data: T) -> Message<T> {
         Message {
             data: Some(data)
+        }
+    }
+
+    fn empty() -> Message<T> {
+        Message {
+            data: None,
         }
     }
 
