@@ -110,6 +110,14 @@ impl Node {
         }
     }
 
+    fn get_prev(&self) -> Option<Box<Node>>{
+        unsafe {
+            self.prev.map(|node| {
+                Box::from_raw(node)
+            })
+        }
+    }
+
 
     fn fire_channel_read<T>(&self, message: Message<T>) {
         self.handler.fire_channel_read();
@@ -128,7 +136,7 @@ impl Node {
         self.handler.fire_channel_write();
 
         if self.handler.need_fire_next() {
-            let next = self.get_next();
+            let next = self.get_prev();
             next.map(|node| {
                 node.fire_channel_write(message)
             });
