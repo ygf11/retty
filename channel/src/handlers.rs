@@ -19,8 +19,3 @@ pub trait Handler {
 
     fn reset(&self);
 }
-
-
-pub trait Chain {
-
-}

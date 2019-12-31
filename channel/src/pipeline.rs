@@ -44,7 +44,7 @@ impl PipeLine {
     /// iterate from head
     pub fn fire_channel_read(&mut self, msg: Vec<u8>) {
         let mut cur = self.get_head();
-        let message = Message::new(msg);
+        let message = Message::new(msg, true);
         let event_type = EventType::READ;
         cur.map(|node| handle(&node, message, &event_type));
     }
@@ -52,7 +52,7 @@ impl PipeLine {
     /// iterate from tail
     pub fn fire_channel_write(&mut self, msg: Vec<u8>, event_type: EventType) {
         let mut cur = self.get_tail();
-        let message = Message::new(msg);
+        let message = Message::new(msg, true);
 
         let event_type = EventType::WRITE;
         cur.map(|node| handle(&node, message, &event_type));
@@ -61,7 +61,7 @@ impl PipeLine {
     /// iterate from head
     pub fn fire_channel_registered(&mut self) {
         let mut cur = self.get_head();
-        let message = Message::<u8>::empty();
+        let message = Message::<u8>::empty(true);
         let event_type = EventType::REGISTER;
         cur.map(|node| handle(&node, message, &event_type));
     }
@@ -69,7 +69,7 @@ impl PipeLine {
     /// iterate from head
     pub fn fire_channel_deregistered(&mut self) {
         let mut cur = self.get_head();
-        let message = Message::<u8>::empty();
+        let message = Message::<u8>::empty(true);
         let event_type = EventType::REGISTER;
         cur.map(|node| handle(&node, message, &event_type));
     }
@@ -187,7 +187,6 @@ impl Node {
 
         self.handler.reset();
     }
-
 }
 
 pub enum EventType {
@@ -207,23 +206,40 @@ fn handle<T>(node: &Box<Node>, msg: Message<T>, event_type: &EventType) {
 }
 
 pub struct Message<T> {
+    propagate: bool,
     data: Option<T>,
 }
 
 impl<T> Message<T> {
-    fn new(data: T) -> Message<T> {
+    fn new(data: T, propagate: bool) -> Message<T> {
         Message {
-            data: Some(data)
+            data: Some(data),
+            propagate: false,
         }
     }
 
-    fn empty() -> Message<T> {
+    fn empty(propagate: bool) -> Message<T> {
         Message {
             data: None,
+            propagate,
         }
     }
 
     fn data(&mut self) -> Option<T> {
         self.data.take()
+    }
+}
+
+pub struct ChannelResult<T> {
+    propagate: bool,
+    data: Message<T>,
+}
+
+impl<T> ChannelResult<T> {
+    fn new(propagate: bool, data: Message<T>) -> ChannelResult<T> {
+        ChannelResult {
+            propagate,
+            data,
+        }
     }
 }
