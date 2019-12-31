@@ -47,7 +47,7 @@ impl PipeLine {
         let message = Message::new(msg);
         while let Some(node) = cur {
             // TODO add handle()
-            handle(&node, message, &event_type);
+            // handle(&node, message, &event_type);
             cur = self.get_node(node.next);
         }
     }
