@@ -105,9 +105,23 @@ impl Node {
         self.handler
     }
 
-    fn fire_channel_read<T>(&self, message:Message<T>) {
-
+    fn get_next(&self) -> Option<Box<Node>> {
+        unsafe {
+            self.next.map(|node| {
+                Box::from_raw(node)
+            })
+        }
     }
+
+
+    fn fire_channel_read<T>(&self, message: Message<T>) {
+        let next = self.get_next();
+        next.map(|node| {
+            node.fire_channel_read(message)
+        });
+    }
+
+
 }
 
 pub enum EventType {
@@ -117,7 +131,7 @@ pub enum EventType {
     DEREGISTER,
 }
 
-fn handle<T>(node: &Box<Node>, msg: Message<T>, event_type: &EventType){
+fn handle<T>(node: &Box<Node>, msg: Message<T>, event_type: &EventType) {
     match event_type {
         EventType::READ => node.handler.fire_channel_read(),
         EventType::WRITE => node.handler.fire_channel_write(),
