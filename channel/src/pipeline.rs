@@ -1,6 +1,8 @@
 use self::super::handlers::Handler;
 use std::ops::Deref;
 use std::panic::resume_unwind;
+use std::rc::Weak;
+use std::marker::PhantomData;
 
 /// channel pipeline
 pub struct PipeLine {
@@ -43,6 +45,7 @@ impl PipeLine {
         }
     }
 
+    /*
     /// iterate from head
     pub fn fire_channel_read(&mut self, msg: Vec<u8>) {
         let mut cur = self.get_head();
@@ -99,7 +102,7 @@ impl PipeLine {
                 Box::from_raw(node)
             })
         }
-    }
+    }*/
 }
 
 struct Node {
@@ -137,7 +140,7 @@ impl Node {
         }
     }
 
-
+    /*
     fn fire_channel_read<T>(&self, message: Message<T>) {
         let result = self.handler.fire_channel_read(message);
 
@@ -189,6 +192,7 @@ impl Node {
 
         self.handler.reset();
     }
+    */
 }
 
 pub enum EventType {
@@ -197,7 +201,7 @@ pub enum EventType {
     REGISTER,
     DEREGISTER,
 }
-
+/*
 fn handle<T>(node: &Box<Node>, msg: Message<T>, event_type: &EventType) {
     match event_type {
         EventType::READ => node.fire_channel_read(msg),
@@ -205,7 +209,7 @@ fn handle<T>(node: &Box<Node>, msg: Message<T>, event_type: &EventType) {
         EventType::REGISTER => node.handler.fire_channel_registered(),
         EventType::DEREGISTER => node.handler.fire_channel_deregsiter(),
     }
-}
+}*/
 
 pub struct Message<T> {
     propagate: bool,
@@ -245,3 +249,48 @@ impl<T> ChannelResult<T> {
         }
     }
 }
+
+
+/// other try of chain
+trait Chains{
+    type InResult;
+    type OutResult;
+    fn handle_in_bound(&self, buffer:Vec<u8>) -> Self::InResult;
+    fn handle_out_bound(&self, result:Self::OutResult) -> Vec<u8>;
+}
+
+/*
+struct NewPipeline<F, S, R>
+    where S: FnOnce(R) -> Vec<u8> {
+    inbound_handler: Option<F>,
+    outbound_handler: Option<S>,
+    phantom: PhantomData<R>,
+}
+
+impl<F, S, R> Line<F, S, R>
+    where S: FnOnce(R) -> Vec<u8>{
+    fn new(f: F, s: S) -> Line<F, S, R> {
+        Line {
+            inbound_handler: Some(f),
+            outbound_handler: Some(s),
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<F, S, T, R> Chains for Line<F, S, R>
+    where F: FnOnce(Vec<u8>) -> T,
+          S: FnOnce(R) -> Vec<u8> {
+    type InResult = T;
+    type OutResult = R;
+
+    fn handle_in_bound(&self, buffer:Vec<u8>) -> Self::Result{
+        let f = self.inbound_handler.take().unwrap();
+        f(from)
+    }
+    fn handle_out_bound(&self, result:Self::OutResult) -> Vec<u8>{
+        let f = self.outbound_handler.take().unwrap();
+        f(from)
+    }
+}
+*/

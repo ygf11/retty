@@ -4,6 +4,7 @@ use self::super::handlers::Handler;
 use std::net::SocketAddr;
 use std::borrow::BorrowMut;
 use mio::{Poll, Token, Ready, PollOpt};
+use std::rc::Rc;
 
 /// channel trait
 pub trait Channel {
@@ -49,6 +50,10 @@ impl Channel for SocketChannel {
         // 3. write into tcp stream
         //
         //
+
+
+        let a = Rc::new(10);
+        a.clone();
     }
 
     fn bind(&mut self) {

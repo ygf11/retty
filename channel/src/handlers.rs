@@ -1,6 +1,7 @@
 use crate::pipeline::Message;
 
-pub trait Handler<T,R> {
+pub trait Handler {
+    /*
     fn fire_channel_read<T, R>(&self, data: Message<T>) -> Message<R>;
 
     fn fire_channel_write<T, R>(&self, data: Message<T>) -> Message<R>;
@@ -20,4 +21,5 @@ pub trait Handler<T,R> {
     fn need_fire_next(&self) -> bool;
 
     fn reset(&self);
+    */
 }
