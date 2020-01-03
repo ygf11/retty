@@ -254,38 +254,36 @@ impl<T> ChannelResult<T> {
 /// other try of chain
 trait Chains {
     type Result;
-    fn handle_in_bound(&mut self, buffer: Vec<u8>) -> Self::Result;
-    fn handle_out_bound(&mut self, result: Self::Result) -> Vec<u8>;
+    fn handle_read_event(&mut self, buffer: Vec<u8>) -> Self::Result;
+    fn handle_write_event(&mut self, result: Self::Result) -> Vec<u8>;
 }
 
 
 struct NewPipeline<F, S, R> {
-    inbound_handler: Option<F>,
-    outbound_handler: Option<S>,
+    inbound_handler: F,
+    outbound_handler: S,
     phantom: PhantomData<R>,
 }
 
 impl<F, S, R> NewPipeline<F, S, R> {
     fn new(f: F, s: S) -> NewPipeline<F, S, R> {
         NewPipeline {
-            inbound_handler: Some(f),
-            outbound_handler: Some(s),
+            inbound_handler: f,
+            outbound_handler: s,
             phantom: PhantomData,
         }
     }
 }
 
 impl<F, S, T> Chains for NewPipeline<F, S, T>
-    where F: FnOnce(Vec<u8>) -> T,
-          S: FnOnce(T) -> Vec<u8> {
+    where F: Fn(Vec<u8>) -> T,
+          S: Fn(T) -> Vec<u8> {
     type Result = T;
 
-    fn handle_in_bound(&mut self, from: Vec<u8>) -> T {
-        let f = self.inbound_handler.take().unwrap();
-        f(from)
+    fn handle_read_event(&mut self, from: Vec<u8>) -> T {
+        (&self.inbound_handler)(from)
     }
-    fn handle_out_bound(&mut self, from: T) -> Vec<u8> {
-        let f = self.outbound_handler.take().unwrap();
-        f(from)
+    fn handle_write_event(&mut self, from: T) -> Vec<u8> {
+        (&self.outbound_handler)(from)
     }
 }
