@@ -253,22 +253,19 @@ impl<T> ChannelResult<T> {
 
 /// other try of chain
 trait Chains {
-    type InResult;
-    type OutResult;
-    fn handle_in_bound(&mut self, buffer: Vec<u8>) -> Self::InResult;
-    fn handle_out_bound(&mut self, result: Self::OutResult) -> Vec<u8>;
+    type Result;
+    fn handle_in_bound(&mut self, buffer: Vec<u8>) -> Self::Result;
+    fn handle_out_bound(&mut self, result: Self::Result) -> Vec<u8>;
 }
 
 
-struct NewPipeline<F, S, R>
-    where S: FnOnce(R) -> Vec<u8> {
+struct NewPipeline<F, S, R> {
     inbound_handler: Option<F>,
     outbound_handler: Option<S>,
     phantom: PhantomData<R>,
 }
 
-impl<F, S, R> NewPipeline<F, S, R>
-    where S: FnOnce(R) -> Vec<u8> {
+impl<F, S, R> NewPipeline<F, S, R> {
     fn new(f: F, s: S) -> NewPipeline<F, S, R> {
         NewPipeline {
             inbound_handler: Some(f),
@@ -278,17 +275,16 @@ impl<F, S, R> NewPipeline<F, S, R>
     }
 }
 
-impl<F, S, T, R> Chains for NewPipeline<F, S, R>
+impl<F, S, T> Chains for NewPipeline<F, S, T>
     where F: FnOnce(Vec<u8>) -> T,
-          S: FnOnce(R) -> Vec<u8> {
-    type InResult = T;
-    type OutResult = R;
+          S: FnOnce(T) -> Vec<u8> {
+    type Result = T;
 
     fn handle_in_bound(&mut self, from: Vec<u8>) -> T {
         let f = self.inbound_handler.take().unwrap();
         f(from)
     }
-    fn handle_out_bound(&mut self, from: R) -> Vec<u8> {
+    fn handle_out_bound(&mut self, from: T) -> Vec<u8> {
         let f = self.outbound_handler.take().unwrap();
         f(from)
     }
