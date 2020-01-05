@@ -254,7 +254,9 @@ impl<T> ChannelResult<T> {
 /// other try of chain
 trait Chains {
     type Result;
+
     fn handle_read_event(&mut self, buffer: Vec<u8>) -> Self::Result;
+
     fn handle_write_event(&mut self, result: Self::Result) -> Vec<u8>;
 }
 
@@ -275,6 +277,7 @@ impl<F, S, R> NewPipeline<F, S, R> {
     }
 }
 
+/// TODO en/de coding different object
 impl<F, S, T> Chains for NewPipeline<F, S, T>
     where F: Fn(Vec<u8>) -> T,
           S: Fn(T) -> Vec<u8> {
