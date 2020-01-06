@@ -106,9 +106,16 @@ impl Channel for ServerChannel {
         // unsupport
     }
 
-    fn read(&self) {}
+    fn read(&self) {
+        // 1. read from socket
+        // 2. pipeline.handle_channel_read()
+        // 3. pipeline.handle_channel_write()
+        // 4. channel.write()
+    }
 
-    fn write(&self) {}
+    fn write(&self) {
+
+    }
 
     fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,

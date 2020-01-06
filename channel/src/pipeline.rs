@@ -283,9 +283,11 @@ impl<F, S, T> Chains for NewPipeline<F, S, T>
           S: Fn(T) -> Vec<u8> {
     type Result = T;
 
+    /// TODO use enum as T
     fn handle_read_event(&mut self, from: Vec<u8>) -> T {
         (&self.inbound_handler)(from)
     }
+
     fn handle_write_event(&mut self, from: T) -> Vec<u8> {
         (&self.outbound_handler)(from)
     }
