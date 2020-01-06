@@ -1,5 +1,5 @@
 use mio::net::{TcpStream, TcpListener};
-use self::super::pipeline::DefaultPipeline;
+use self::super::pipeline::PipeLine;
 use self::super::handlers::Handler;
 use std::net::SocketAddr;
 use std::borrow::BorrowMut;
@@ -28,17 +28,17 @@ pub struct SocketChannel {
     channel: TcpStream,
     write_buf: Vec<u8>,
     // pipeline: NewPipeline,
-    //pipeline: PipeLine,
+    pipeline: PipeLine,
 }
 
 impl SocketChannel {
     pub fn new(channel: TcpStream, handlers: Vec<Box<dyn Handler + Send>>) -> SocketChannel {
-        //let mut pipeline = PipeLine::new();
-        //pipeline.add_all(handlers);
+        let mut pipeline = PipeLine::new();
+        pipeline.add_all(handlers);
 
         SocketChannel {
             channel,
-            //pipeline,
+            pipeline,
             write_buf: Vec::new(),
 
         }

@@ -19,27 +19,21 @@ use self::channel::channels::{SocketChannel, ServerChannel};
 use crate::token::Tokens;
 use self::channel::handlers::Handler;
 use std::net::SocketAddr;
-use self::channel::pipeline::DefaultPipeline;
 
-pub struct EventLoop<F, S, R>
-    where F: Fn(Vec<u8>) -> R,
-          S: Fn(R) -> Vec<u8> {
+pub struct EventLoop {
     poll: Poll,
     tokens: Tokens,
     events: Events,
     thread: Thread,
-    sender: Sender<Message<F, S, R>>,
-    receiver: Option<Receiver<Message<F, S, R>>>,
+    sender: Sender<Message>,
+    receiver: Option<Receiver<Message>>,
     task_queue: Option<Vec<LocalTask>>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
 
-impl<F, S, R> EventLoop<F, S, R>
-    where F: Fn(Vec<u8>) -> R,
-          S: Fn(R) -> Vec<u8> {
-    pub fn new(sender: Sender<Message<F, S, R>>, receiver: Receiver<Message<F, S, R>>)
-               -> EventLoop<F, S, R> {
+impl EventLoop {
+    pub fn new(sender: Sender<Message>, receiver: Receiver<Message>) -> EventLoop {
         let poll = match Poll::new() {
             Ok(p) => p,
             Err(e) => panic!("create mio poll failed!"),
@@ -92,11 +86,11 @@ impl<F, S, R> EventLoop<F, S, R>
         }
     }
 
-    pub fn producer(&self) -> Sender<Message<F, S, R>> {
+    pub fn producer(&self) -> Sender<Message> {
         self.sender.clone()
     }
 
-    pub fn execute(&mut self, task: Message<F, S, R>) {
+    pub fn execute(&mut self, task: Message) {
         self.sender.clone().send(task);
     }
 
@@ -132,7 +126,7 @@ impl<F, S, R> EventLoop<F, S, R>
         self.task_queue = Some(queue);
     }
 
-    fn run_remote_task(&mut self, operation: Message<F, S, R>) {
+    fn run_remote_task(&mut self, operation: Message) {
         match operation {
             // bind
             Operation::Bind(address, handlers) => {
@@ -168,9 +162,9 @@ impl<F, S, R> EventLoop<F, S, R>
     }
 }
 
-pub enum Operation<F, S, R> {
-    Bind(SocketAddr, DefaultPipeline<F, S, R>),
-    Connect(SocketAddr, DefaultPipeline<F, S, R>),
+pub enum Operation {
+    Bind(SocketAddr, Vec<Box<dyn Handler + Send>>),
+    Connect(SocketAddr, Vec<Box<dyn Handler + Send>>),
 }
 
 pub struct LocalTask {
@@ -178,4 +172,4 @@ pub struct LocalTask {
 }
 
 
-pub type Message<F, S, R> = Operation<F, S, R>;
+pub type Message = Operation;
