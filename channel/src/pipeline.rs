@@ -282,14 +282,14 @@ impl<F, S, R> NewPipeline<F, S, R> {
 
 /// TODO en/de coding different object
 impl<F, S, T> Chains for NewPipeline<F, S, T>
-    where F: Fn(Vec<u8>) -> T,
-          S: Fn(T) -> Vec<u8> {
+    where F: Fn(&mut NewPipeline<F,S,T>, Vec<u8>) -> T,
+          S: Fn(&mut NewPipeline<F,S,T>, T) -> Vec<u8> {
     type Result = T;
 
     /// TODO use enum as T
     fn handle_read_event(&mut self, from: Vec<u8>) -> T {
         let handler = self.inbound_handler.take().expect("inbound handler is None.");
-        let result = handler(from);
+        let result = handler(self, from);
         self.inbound_handler = Some(handler);
         //(&self.inbound_handler)(from)
         result
@@ -297,7 +297,7 @@ impl<F, S, T> Chains for NewPipeline<F, S, T>
 
     fn handle_write_event(&mut self, from: T) -> Vec<u8> {
         let handler = self.outbound_handler.take().expect("inbound handler is None.");
-        let result = handler(from);
+        let result = handler(self, from);
         self.outbound_handler = Some(handler);
         //(&self.inbound_handler)(from)
         result
