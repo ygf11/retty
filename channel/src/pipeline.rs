@@ -262,16 +262,16 @@ pub trait Chains {
 }
 
 
-pub struct NewPipeline<F, S, R> {
+pub struct DefaultPipeline<F, S, R> {
     inbound_handler: Option<F>,
     outbound_handler: Option<S>,
     phantom: PhantomData<R>,
     write_buffer: Vec<Vec<u8>>,
 }
 
-impl<F, S, R> NewPipeline<F, S, R> {
-    fn new(f: F, s: S) -> NewPipeline<F, S, R> {
-        NewPipeline {
+impl<F, S, R> DefaultPipeline<F, S, R> {
+    fn new(f: F, s: S) -> DefaultPipeline<F, S, R> {
+        DefaultPipeline{
             inbound_handler: Some(f),
             outbound_handler: Some(s),
             phantom: PhantomData,
@@ -281,9 +281,9 @@ impl<F, S, R> NewPipeline<F, S, R> {
 }
 
 /// TODO en/de coding different object
-impl<F, S, T> Chains for NewPipeline<F, S, T>
-    where F: Fn(&mut NewPipeline<F,S,T>, Vec<u8>) -> T,
-          S: Fn(&mut NewPipeline<F,S,T>, T) -> Vec<u8> {
+impl<F, S, T> Chains for DefaultPipeline<F, S, T>
+    where F: Fn(&mut DefaultPipeline<F,S,T>, Vec<u8>) -> T,
+          S: Fn(&mut DefaultPipeline<F,S,T>, T) -> Vec<u8> {
     type Result = T;
 
     /// TODO use enum as T
@@ -308,3 +308,5 @@ impl<F, S, T> Chains for NewPipeline<F, S, T>
         self.write_buffer.push(data);
     }
 }
+
+

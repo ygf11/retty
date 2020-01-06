@@ -8,22 +8,20 @@ use executor::eventloop::EventLoop;
 use self::executor::eventloop::{Message, Operation};
 use self::channel::handlers::Handler;
 use std::net::SocketAddr;
-use self::channel::pipeline::NewPipeline;
+use self::channel::pipeline::DefaultPipeline;
 
 
 struct ServerBootStrap<F, S, R> {
-    sender: Option<Sender<Message>>,
-    // handlers: Option<Vec<Box<dyn Handler + Send>>>,
-    pipeline: NewPipeline<F, S, R>,
+    sender: Option<Sender<Message<F, S, R>>>,
+    pipeline: DefaultPipeline<F, S, R>,
 
 }
 
 
 impl<F, S, R> ServerBootStrap<F, S, R> {
-    fn new(pipeline: NewPipeline<F, S, R>) -> ServerBootStrap<F, S, R> {
+    fn new(pipeline: DefaultPipeline<F, S, R>) -> ServerBootStrap<F, S, R> {
         ServerBootStrap {
             sender: None,
-            // handlers: Some(Vec::new()),
             pipeline,
         }
     }

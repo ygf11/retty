@@ -19,21 +19,27 @@ use self::channel::channels::{SocketChannel, ServerChannel};
 use crate::token::Tokens;
 use self::channel::handlers::Handler;
 use std::net::SocketAddr;
+use self::channel::pipeline::DefaultPipeline;
 
-pub struct EventLoop {
+pub struct EventLoop<F, S, R>
+    where F: Fn(Vec<u8>) -> R,
+          S: Fn(R) -> Vec<u8> {
     poll: Poll,
     tokens: Tokens,
     events: Events,
     thread: Thread,
-    sender: Sender<Message>,
-    receiver: Option<Receiver<Message>>,
+    sender: Sender<Message<F, S, R>>,
+    receiver: Option<Receiver<Message<F, S, R>>>,
     task_queue: Option<Vec<LocalTask>>,
     channels: HashMap<Token, Box<dyn Channel>>,
 }
 
 
-impl EventLoop {
-    pub fn new(sender: Sender<Message>, receiver: Receiver<Message>) -> EventLoop {
+impl<F, S, R> EventLoop<F, S, R>
+    where F: Fn(Vec<u8>) -> R,
+          S: Fn(R) -> Vec<u8> {
+    pub fn new(sender: Sender<Message<F, S, R>>, receiver: Receiver<Message<F, S, R>>)
+               -> EventLoop<F, S, R> {
         let poll = match Poll::new() {
             Ok(p) => p,
             Err(e) => panic!("create mio poll failed!"),
@@ -86,11 +92,11 @@ impl EventLoop {
         }
     }
 
-    pub fn producer(&self) -> Sender<Message> {
+    pub fn producer(&self) -> Sender<Message<F, S, R>> {
         self.sender.clone()
     }
 
-    pub fn execute(&mut self, task: Message) {
+    pub fn execute(&mut self, task: Message<F, S, R>) {
         self.sender.clone().send(task);
     }
 
@@ -126,7 +132,7 @@ impl EventLoop {
         self.task_queue = Some(queue);
     }
 
-    fn run_remote_task(&mut self, operation: Message) {
+    fn run_remote_task(&mut self, operation: Message<F, S, R>) {
         match operation {
             // bind
             Operation::Bind(address, handlers) => {
@@ -162,9 +168,9 @@ impl EventLoop {
     }
 }
 
-pub enum Operation {
-    Bind(SocketAddr, Vec<Box<dyn Handler + Send>>),
-    Connect(SocketAddr, Vec<Box<dyn Handler + Send>>),
+pub enum Operation<F, S, R> {
+    Bind(SocketAddr, DefaultPipeline<F, S, R>),
+    Connect(SocketAddr, DefaultPipeline<F, S, R>),
 }
 
 pub struct LocalTask {
@@ -172,4 +178,4 @@ pub struct LocalTask {
 }
 
 
-pub type Message = Operation;
+pub type Message<F, S, R> = Operation<F, S, R>;

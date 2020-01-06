@@ -1,5 +1,5 @@
 use mio::net::{TcpStream, TcpListener};
-use self::super::pipeline::NewPipeline;
+use self::super::pipeline::DefaultPipeline;
 use self::super::handlers::Handler;
 use std::net::SocketAddr;
 use std::borrow::BorrowMut;
