@@ -251,7 +251,7 @@ impl<T> ChannelResult<T> {
 
 
 /// other try of chain
-pub trait Chains {
+/*pub trait Chains {
     type Result;
 
     fn handle_read_event(&mut self, buffer: Vec<u8>) -> Self::Result;
@@ -307,6 +307,14 @@ impl<F, S, T> Chains for DefaultPipeline<F, S, T>
         let data = self.handle_write_event(from);
         self.write_buffer.push(data);
     }
+}
+*/
+
+pub trait NewPipeline {
+
+    fn handle_read_event(&mut self, buffer: Vec<u8>);
+
+    fn write(&mut self, buffer:Vec<u8>);
 }
 
 

@@ -19,6 +19,7 @@ use self::channel::channels::{SocketChannel, ServerChannel};
 use crate::token::Tokens;
 use self::channel::handlers::Handler;
 use std::net::SocketAddr;
+use self::channel::pipeline::NewPipeline;
 
 pub struct EventLoop {
     poll: Poll,
@@ -129,8 +130,8 @@ impl EventLoop {
     fn run_remote_task(&mut self, operation: Message) {
         match operation {
             // bind
-            Operation::Bind(address, handlers) => {
-                let server = ServerChannel::new(address, handlers);
+            Operation::Bind(address, handler) => {
+                let server = ServerChannel::new(address, handler);
 
                 match server {
                     Ok(channel) => self.register(Box::new(channel)),
@@ -139,12 +140,12 @@ impl EventLoop {
             }
 
             // connect
-            Operation::Connect(address, handlers) => {
+            Operation::Connect(address, handler) => {
                 let client = TcpStream::connect(&address);
 
                 match client {
                     Ok(channel) =>
-                        self.register(Box::new(SocketChannel::new(channel, handlers))),
+                        self.register(Box::new(SocketChannel::new(channel, handler))),
                     Err(e) => println!("{:?}", e)
                 }
             }
@@ -163,8 +164,8 @@ impl EventLoop {
 }
 
 pub enum Operation {
-    Bind(SocketAddr, Vec<Box<dyn Handler + Send>>),
-    Connect(SocketAddr, Vec<Box<dyn Handler + Send>>),
+    Bind(SocketAddr, Box<dyn NewPipeline + Send>),
+    Connect(SocketAddr, Box<dyn  NewPipeline + Send>),
 }
 
 pub struct LocalTask {

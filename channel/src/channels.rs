@@ -5,6 +5,7 @@ use std::net::SocketAddr;
 use std::borrow::BorrowMut;
 use mio::{Poll, Token, Ready, PollOpt};
 use std::rc::Rc;
+use crate::pipeline::NewPipeline;
 
 /// channel trait
 pub trait Channel {
@@ -27,18 +28,15 @@ pub trait Channel {
 pub struct SocketChannel {
     channel: TcpStream,
     write_buf: Vec<u8>,
-    // pipeline: NewPipeline,
-    pipeline: PipeLine,
+    pipeline: Box<dyn NewPipeline + Send>,
+    //pipeline: PipeLine,
 }
 
 impl SocketChannel {
-    pub fn new(channel: TcpStream, handlers: Vec<Box<dyn Handler + Send>>) -> SocketChannel {
-        let mut pipeline = PipeLine::new();
-        pipeline.add_all(handlers);
-
+    pub fn new(channel: TcpStream, handler: Box<dyn NewPipeline + Send>) -> SocketChannel {
         SocketChannel {
             channel,
-            pipeline,
+            pipeline: handler,
             write_buf: Vec::new(),
 
         }
@@ -50,7 +48,6 @@ impl Channel for SocketChannel {
         // 1. read from tcp stream
         // 2. fire event in handler-chain
         // 3. write into tcp stream
-        //
         //
 
 
@@ -76,12 +73,12 @@ impl Channel for SocketChannel {
 
 pub struct ServerChannel {
     channel: TcpListener,
-    //pipeline: PipeLine,
+    pipeline: Box<dyn NewPipeline + Send>,
 }
 
 impl ServerChannel {
     pub fn new(address: SocketAddr,
-               handlers: Vec<Box<dyn Handler + Send>>)
+               handler: Box<dyn NewPipeline + Send>)
                -> Result<ServerChannel, &'static str> {
         let socket = TcpListener::bind(&address).
             map_err(|err| "bind failed.")?;
@@ -90,7 +87,7 @@ impl ServerChannel {
         //pipeline.add_all(handlers);
 
         let result = ServerChannel {
-            //    pipeline,
+            pipeline:handler,
             channel: socket,
         };
 
