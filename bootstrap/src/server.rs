@@ -8,25 +8,29 @@ use executor::eventloop::EventLoop;
 use self::executor::eventloop::{Message, Operation};
 use self::channel::handlers::Handler;
 use std::net::SocketAddr;
+use self::channel::pipeline::NewPipeline;
 
 
-struct ServerBootStrap {
+struct ServerBootStrap<F, S, R> {
     sender: Option<Sender<Message>>,
-    handlers: Option<Vec<Box<dyn Handler + Send>>>,
+    // handlers: Option<Vec<Box<dyn Handler + Send>>>,
+    pipeline: NewPipeline<F, S, R>,
+
 }
 
 
-impl ServerBootStrap {
-    fn new() -> ServerBootStrap {
+impl<F, S, R> ServerBootStrap<F, S, R> {
+    fn new(pipeline: NewPipeline<F, S, R>) -> ServerBootStrap<F, S, R> {
         ServerBootStrap {
             sender: None,
-            handlers: Some(Vec::new()),
+            // handlers: Some(Vec::new()),
+            pipeline,
         }
     }
 
     fn add_last(&mut self, handler: Box<dyn Handler + Send>) {
-        self.handlers.as_mut().map(|handlers|
-            { handlers.push(handler) });
+        //self.handlers.as_mut().map(|handlers|
+        //    { handlers.push(handler) });
     }
 
     /// send msg to thread
@@ -43,14 +47,15 @@ impl ServerBootStrap {
 
             Some(sender)
         });
+
         self.sender = result;
 
-        let handlers = self.handlers.take();
+        //let handlers = self.handlers.take();
         // register
         self.sender.as_ref().map(move |sender| {
-            let handlers = handlers.expect("handlers is None.");
-            let message = Operation::Bind(addr, handlers);
-            sender.send(message);
+            //let handlers = handlers.expect("handlers is None.");
+            //let message = Operation::Bind(addr, handlers);
+            //sender.send(message);
         });
     }
 
