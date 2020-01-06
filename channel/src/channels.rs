@@ -23,6 +23,8 @@ pub trait Channel {
 
     /// register interested
     fn register(&self, poll: &Poll, token: Token);
+
+    fn is_server(&self) -> bool;
 }
 
 pub struct SocketChannel {
@@ -60,6 +62,10 @@ impl Channel for SocketChannel {
     fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
+    }
+
+    fn is_server(&self) -> bool{
+        false
     }
 }
 
@@ -106,5 +112,9 @@ impl Channel for ServerChannel {
     fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
+    }
+
+    fn is_server(&self) -> bool{
+        true
     }
 }
