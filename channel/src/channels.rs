@@ -1,5 +1,5 @@
 use mio::net::{TcpStream, TcpListener};
-use self::super::pipeline::PipeLine;
+use self::super::pipeline::NewPipeline;
 use self::super::handlers::Handler;
 use std::net::SocketAddr;
 use std::borrow::BorrowMut;
@@ -27,18 +27,20 @@ pub trait Channel {
 pub struct SocketChannel {
     channel: TcpStream,
     write_buf: Vec<u8>,
-    pipeline: PipeLine,
+    // pipeline: NewPipeline,
+    //pipeline: PipeLine,
 }
 
 impl SocketChannel {
     pub fn new(channel: TcpStream, handlers: Vec<Box<dyn Handler + Send>>) -> SocketChannel {
-        let mut pipeline = PipeLine::new();
-        pipeline.add_all(handlers);
+        //let mut pipeline = PipeLine::new();
+        //pipeline.add_all(handlers);
 
         SocketChannel {
             channel,
-            pipeline,
+            //pipeline,
             write_buf: Vec::new(),
+
         }
     }
 }
@@ -74,7 +76,7 @@ impl Channel for SocketChannel {
 
 pub struct ServerChannel {
     channel: TcpListener,
-    pipeline: PipeLine,
+    //pipeline: PipeLine,
 }
 
 impl ServerChannel {
@@ -84,11 +86,11 @@ impl ServerChannel {
         let socket = TcpListener::bind(&address).
             map_err(|err| "bind failed.")?;
 
-        let mut pipeline = PipeLine::new();
-        pipeline.add_all(handlers);
+        //let mut pipeline = PipeLine::new();
+        //pipeline.add_all(handlers);
 
         let result = ServerChannel {
-            pipeline,
+            //    pipeline,
             channel: socket,
         };
 
@@ -114,9 +116,7 @@ impl Channel for ServerChannel {
         // 4. channel.write()
     }
 
-    fn write(&self) {
-
-    }
+    fn write(&self) {}
 
     fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,

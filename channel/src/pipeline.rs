@@ -251,7 +251,7 @@ impl<T> ChannelResult<T> {
 
 
 /// other try of chain
-trait Chains {
+pub trait Chains {
     type Result;
 
     fn handle_read_event(&mut self, buffer: Vec<u8>) -> Self::Result;
@@ -262,7 +262,7 @@ trait Chains {
 }
 
 
-struct NewPipeline<F, S, R> {
+pub struct NewPipeline<F, S, R> {
     inbound_handler: Option<F>,
     outbound_handler: Option<S>,
     phantom: PhantomData<R>,
