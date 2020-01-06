@@ -6,16 +6,20 @@ use std::borrow::BorrowMut;
 use mio::{Poll, Token, Ready, PollOpt};
 use std::rc::Rc;
 use crate::pipeline::NewPipeline;
+use std::sync::mpsc::Sender;
+use std::error::Error;
 
 /// channel trait
 pub trait Channel {
     fn get(&self);
 
     /// event loop invoke this read method
-    fn read(&self);
+    fn read(&mut self);
 
     /// callback
     fn write(&self);
+
+    fn accept(&mut self) -> Result<TcpStream, &'static str>;
 
     /// register interested
     fn register(&self, poll: &Poll, token: Token);
@@ -25,7 +29,6 @@ pub struct SocketChannel {
     channel: TcpStream,
     write_buf: Vec<u8>,
     pipeline: Box<dyn NewPipeline + Send>,
-    //pipeline: PipeLine,
 }
 
 impl SocketChannel {
@@ -39,16 +42,20 @@ impl SocketChannel {
 }
 
 impl Channel for SocketChannel {
-    fn get(&self) {
-        // 1. read from tcp stream
-        // 2. fire event in handler-chain
-        // 3. write into tcp stream
-        //
+    fn get(&self) {}
+
+    fn read(&mut self) {
+        // 1. read from socket
+        // 2. pipeline.handle_channel_read()
+        // 3. pipeline.handle_channel_write()
+        // 4. channel.write()
     }
 
-    fn read(&self) {}
-
     fn write(&self) {}
+
+    fn accept(&mut self) -> Result<TcpStream, &'static str> {
+        panic!("unsupport operation for Socket channel.")
+    }
 
     fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,
@@ -69,7 +76,7 @@ impl ServerChannel {
             map_err(|err| "bind failed.")?;
 
         let result = ServerChannel {
-            pipeline:handler,
+            pipeline: handler,
             channel: socket,
         };
 
@@ -81,15 +88,20 @@ impl ServerChannel {
 impl Channel for ServerChannel {
     fn get(&self) {}
 
-    fn read(&self) {
-        // TODO
-        // 1. read from socket
-        // 2. pipeline.handle_channel_read()
-        // 3. pipeline.handle_channel_write()
-        // 4. channel.write()
+    /// accept connection
+    fn read(&mut self) {
+        panic!("unsupport operation for serverChannel.")
     }
 
     fn write(&self) {}
+
+    fn accept(&mut self) -> Result<TcpStream, &'static str> {
+        let channel = &mut self.channel;
+        match channel.accept() {
+            Ok((tcpStream, addr)) => Ok(tcpStream),
+            Err(e) => Err("accept connection error."),
+        }
+    }
 
     fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,

@@ -75,9 +75,10 @@ impl EventLoop {
 
             for event in events.iter() {
                 match event.token() {
-                    //read and accept
+                    // read and accept
                     reader => if event.readiness().is_readable() {},
 
+                    // write event
                     writer => if event.readiness().is_writable() {}
                 }
             }
