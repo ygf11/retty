@@ -1,6 +1,5 @@
 use self::super::handlers::Handler;
 use std::ops::Deref;
-use std::panic::resume_unwind;
 use std::rc::Weak;
 use std::marker::PhantomData;
 
@@ -258,21 +257,25 @@ trait Chains {
     fn handle_read_event(&mut self, buffer: Vec<u8>) -> Self::Result;
 
     fn handle_write_event(&mut self, result: Self::Result) -> Vec<u8>;
+
+    fn write(&mut self, result: Self::Result);
 }
 
 
 struct NewPipeline<F, S, R> {
-    inbound_handler: F,
-    outbound_handler: S,
+    inbound_handler: Option<F>,
+    outbound_handler: Option<S>,
     phantom: PhantomData<R>,
+    write_buffer: Vec<Vec<u8>>,
 }
 
 impl<F, S, R> NewPipeline<F, S, R> {
     fn new(f: F, s: S) -> NewPipeline<F, S, R> {
         NewPipeline {
-            inbound_handler: f,
-            outbound_handler: s,
+            inbound_handler: Some(f),
+            outbound_handler: Some(s),
             phantom: PhantomData,
+            write_buffer: Vec::new(),
         }
     }
 }
@@ -285,10 +288,23 @@ impl<F, S, T> Chains for NewPipeline<F, S, T>
 
     /// TODO use enum as T
     fn handle_read_event(&mut self, from: Vec<u8>) -> T {
-        (&self.inbound_handler)(from)
+        let handler = self.inbound_handler.take().expect("inbound handler is None.");
+        let result = handler(from);
+        self.inbound_handler = Some(handler);
+        //(&self.inbound_handler)(from)
+        result
     }
 
     fn handle_write_event(&mut self, from: T) -> Vec<u8> {
-        (&self.outbound_handler)(from)
+        let handler = self.outbound_handler.take().expect("inbound handler is None.");
+        let result = handler(from);
+        self.outbound_handler = Some(handler);
+        //(&self.inbound_handler)(from)
+        result
+    }
+
+    fn write(&mut self, from: T) {
+        let data = self.handle_write_event(from);
+        self.write_buffer.push(data);
     }
 }
