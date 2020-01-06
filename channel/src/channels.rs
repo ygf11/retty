@@ -11,10 +11,6 @@ use crate::pipeline::NewPipeline;
 pub trait Channel {
     fn get(&self);
 
-    fn bind(&mut self);
-
-    fn connect(&mut self);
-
     /// event loop invoke this read method
     fn read(&self);
 
@@ -38,7 +34,6 @@ impl SocketChannel {
             channel,
             pipeline: handler,
             write_buf: Vec::new(),
-
         }
     }
 }
@@ -49,17 +44,7 @@ impl Channel for SocketChannel {
         // 2. fire event in handler-chain
         // 3. write into tcp stream
         //
-
-
-        let a = Rc::new(10);
-        a.clone();
     }
-
-    fn bind(&mut self) {
-        // unsupport
-    }
-
-    fn connect(&mut self) {}
 
     fn read(&self) {}
 
@@ -83,9 +68,6 @@ impl ServerChannel {
         let socket = TcpListener::bind(&address).
             map_err(|err| "bind failed.")?;
 
-        //let mut pipeline = PipeLine::new();
-        //pipeline.add_all(handlers);
-
         let result = ServerChannel {
             pipeline:handler,
             channel: socket,
@@ -98,12 +80,6 @@ impl ServerChannel {
 
 impl Channel for ServerChannel {
     fn get(&self) {}
-
-    fn bind(&mut self) {}
-
-    fn connect(&mut self) {
-        // unsupport
-    }
 
     fn read(&self) {
         // TODO

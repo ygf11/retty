@@ -25,11 +25,6 @@ impl ServerBootStrap {
         }
     }
 
-    //fn add_last(&mut self, handler: Box<dyn Handler + Send>) {
-    //    self.handlers.as_mut().map(|handlers|
-    //        { handlers.push(handler) });
-    //}
-
     /// send msg to thread
     fn bind(&mut self, addr: SocketAddr) {
         let result = self.sender.take().or_else(|| {
