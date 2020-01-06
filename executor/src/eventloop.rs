@@ -162,6 +162,14 @@ impl EventLoop {
         // TODO UNIQUE
         self.tokens.next()
     }
+
+    fn handle_read_event(&mut self, token: Token) {
+        let channel = self.channels.get_mut(&token);
+    }
+
+    fn handle_write_event(&self, token: Token) {
+
+    }
 }
 
 pub enum Operation {
