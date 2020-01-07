@@ -180,9 +180,16 @@ impl EventLoop {
 
     fn handle_write_event(&self, token: Token) {}
 
-    fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {}
+    fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {
 
-    fn handle_accept_event(&mut self, channel: &mut Box<dyn Channel>) {}
+    }
+
+    fn handle_accept_event(&mut self, channel: &mut Box<dyn Channel>) {
+        let result = channel.accept().map(move |tcp_stream|{
+
+        });
+
+    }
 }
 
 pub enum Operation {

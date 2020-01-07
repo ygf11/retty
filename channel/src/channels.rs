@@ -13,6 +13,8 @@ use std::error::Error;
 pub trait Channel {
     fn get(&self);
 
+    fn child_handler(&self) -> Box<dyn NewPipeline>;
+
     /// event loop invoke this read method
     fn read(&mut self);
 
@@ -45,6 +47,10 @@ impl SocketChannel {
 
 impl Channel for SocketChannel {
     fn get(&self) {}
+
+    fn child_handler(&self) -> Box<dyn NewPipeline>{
+        panic!("unsupport operation for socket channel.");
+    }
 
     fn read(&mut self) {
         // 1. read from socket
@@ -93,6 +99,10 @@ impl ServerChannel {
 
 impl Channel for ServerChannel {
     fn get(&self) {}
+
+    fn child_handler(&self) -> Box<dyn NewPipeline>{
+        self.pipeline.clone()
+    }
 
     /// accept connection
     fn read(&mut self) {

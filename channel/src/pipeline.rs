@@ -310,11 +310,14 @@ impl<F, S, T> Chains for DefaultPipeline<F, S, T>
 }
 */
 
+
 pub trait NewPipeline {
 
     fn handle_read_event(&mut self, buffer: Vec<u8>);
 
     fn write(&mut self, buffer:Vec<u8>);
+
+    fn clone(&self) -> Box<dyn NewPipeline>;
 }
 
 
