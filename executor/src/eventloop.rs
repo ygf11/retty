@@ -24,8 +24,8 @@ use self::channel::pipeline::NewPipeline;
 pub struct EventLoop {
     poll: Poll,
     tokens: Tokens,
-    events: Events,
     thread: Thread,
+    events: Option<Events>,
     sender: Sender<Message>,
     receiver: Option<Receiver<Message>>,
     task_queue: Option<Vec<LocalTask>>,
@@ -41,14 +41,14 @@ impl EventLoop {
         };
 
         EventLoop {
-            poll,
             sender,
+            poll:poll,
             tokens: Tokens::new(),
             receiver: Some(receiver),
             task_queue: Some(Vec::new()),
             thread: thread::current(),
             channels: HashMap::new(),
-            events: Events::with_capacity(128),
+            events: Some(Events::with_capacity(128)),
         }
     }
 
@@ -68,20 +68,35 @@ impl EventLoop {
     pub fn run_loop(&mut self) {
         loop {
             let poll = &mut self.poll;
-            let events = &mut self.events;
+            let mut events = self.events.take();
             let channels = &mut self.channels;
 
-            poll.poll(events, Some(Duration::from_millis(100)));
+            events.as_mut().map(|events| {
+                // poll.poll(events, Some(Duration::from_millis(100)));
 
-            for event in events.iter() {
-                match event.token() {
+                //for event in events.iter() {
+                //    match event.token() {
+                        // read and accept
+                //        reader => if event.readiness().is_readable() {
+                            // self.handle_read_or_accept_event(reader);
+                //        },
+                        // write event
+                //        writer => if event.readiness().is_writable() {}
+                //    }
+                //}
+            });
+            //poll.poll(events, Some(Duration::from_millis(100)));
+
+            //for event in events.iter() {
+            //    match event.token() {
                     // read and accept
-                    reader => if event.readiness().is_readable() {},
-
+            //        reader => if event.readiness().is_readable() {},
                     // write event
-                    writer => if event.readiness().is_writable() {}
-                }
-            }
+            //        writer => if event.readiness().is_writable() {}
+            //    }
+            //}
+
+            self.events = events;
 
             // TODO handle tasks
             self.run_tasks();
@@ -180,7 +195,7 @@ impl EventLoop {
 
     fn handle_write_event(&mut self, token: Token) {
         let mut value = self.channels.remove(&token);
-        if let Some(channel) = value.as_mut(){
+        if let Some(channel) = value.as_mut() {
             channel.write();
         }
 
@@ -203,6 +218,11 @@ impl EventLoop {
 
             Err(e) => println!("err"),
         }
+    }
+
+    fn get_events(&mut self) -> Events {
+        let events = self.events.take();
+        events.expect("emoty events error.")
     }
 }
 
