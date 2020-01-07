@@ -317,7 +317,7 @@ pub trait NewPipeline {
 
     fn write(&mut self, buffer:Vec<u8>);
 
-    fn clone(&self) -> Box<dyn NewPipeline>;
+    fn clone(&self) -> Box<dyn NewPipeline + Send>;
 }
 
 

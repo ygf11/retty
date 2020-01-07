@@ -166,7 +166,7 @@ impl EventLoop {
     fn handle_read_or_accept_event(&mut self, token: Token) {
         let mut value = self.channels.remove(&token);
 
-        if let Some( channel) = value.as_mut() {
+        if let Some(channel) = value.as_mut() {
             match channel.is_server() {
                 true => self.handle_accept_event(channel),
                 false => self.handle_read_event(channel),
@@ -178,17 +178,31 @@ impl EventLoop {
         }
     }
 
-    fn handle_write_event(&self, token: Token) {}
+    fn handle_write_event(&mut self, token: Token) {
+        let mut value = self.channels.remove(&token);
+        if let Some(channel) = value.as_mut(){
+            channel.write();
+        }
+
+        if let Some(channel) = value {
+            self.channels.insert(token, channel);
+        }
+    }
 
     fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {
-
+        channel.read();
     }
 
     fn handle_accept_event(&mut self, channel: &mut Box<dyn Channel>) {
-        let result = channel.accept().map(move |tcp_stream|{
+        let pipeline = channel.child_handler();
+        match channel.accept() {
+            Ok(tcp_stream) => {
+                self.register(
+                    Box::new(SocketChannel::new(tcp_stream, pipeline)));
+            }
 
-        });
-
+            Err(e) => println!("err"),
+        }
     }
 }
 
