@@ -164,20 +164,25 @@ impl EventLoop {
     }
 
     fn handle_read_or_accept_event(&mut self, token: Token) {
-        let channel = self.channels.get_mut(&token);
+        let mut value = self.channels.remove(&token);
+
+        if let Some( channel) = value.as_mut() {
+            match channel.is_server() {
+                true => self.handle_accept_event(channel),
+                false => self.handle_read_event(channel),
+            }
+        }
+
+        if let Some(channel) = value {
+            self.channels.insert(token, channel);
+        }
     }
 
-    fn handle_write_event(&self, token: Token) {
+    fn handle_write_event(&self, token: Token) {}
 
-    }
+    fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {}
 
-    fn handle_read_event(&mut self, channel: impl Channel){
-
-    }
-
-    fn handle_accept_event(&mut self, channel: impl Channel){
-
-    }
+    fn handle_accept_event(&mut self, channel: &mut Box<dyn Channel>) {}
 }
 
 pub enum Operation {
