@@ -163,11 +163,19 @@ impl EventLoop {
         self.tokens.next()
     }
 
-    fn handle_read_event(&mut self, token: Token) {
+    fn handle_read_or_accept_event(&mut self, token: Token) {
         let channel = self.channels.get_mut(&token);
     }
 
     fn handle_write_event(&self, token: Token) {
+
+    }
+
+    fn handle_read_event(&mut self, channel: impl Channel){
+
+    }
+
+    fn handle_accept_event(&mut self, channel: impl Channel){
 
     }
 }
