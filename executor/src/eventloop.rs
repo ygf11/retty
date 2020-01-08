@@ -41,8 +41,8 @@ impl EventLoop {
         };
 
         EventLoop {
-            sender,
             poll,
+            sender,
             tokens: Tokens::new(),
             receiver: Some(receiver),
             task_queue: Some(Vec::new()),
@@ -91,17 +91,6 @@ impl EventLoop {
                     }
                 }
             });
-
-            //poll.poll(events, Some(Duration::from_millis(100)));
-
-            //for event in events.iter() {
-            //    match event.token() {
-            // read and accept
-            //        reader => if event.readiness().is_readable() {},
-            // write event
-            //        writer => if event.readiness().is_writable() {}
-            //    }
-            //}
 
             self.events = events;
 
@@ -229,7 +218,7 @@ impl EventLoop {
 
     fn get_events(&mut self) -> Events {
         let events = self.events.take();
-        events.expect("emoty events error.")
+        events.expect("empty events error.")
     }
 }
 
