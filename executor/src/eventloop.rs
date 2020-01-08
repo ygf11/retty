@@ -42,7 +42,7 @@ impl EventLoop {
 
         EventLoop {
             sender,
-            poll:poll,
+            poll,
             tokens: Tokens::new(),
             receiver: Some(receiver),
             task_queue: Some(Vec::new()),
@@ -72,26 +72,33 @@ impl EventLoop {
             let channels = &mut self.channels;
 
             events.as_mut().map(|events| {
-                // poll.poll(events, Some(Duration::from_millis(100)));
-
-                //for event in events.iter() {
-                //    match event.token() {
-                        // read and accept
-                //        reader => if event.readiness().is_readable() {
-                            // self.handle_read_or_accept_event(reader);
-                //        },
-                        // write event
-                //        writer => if event.readiness().is_writable() {}
-                //    }
-                //}
+                poll.poll(events, Some(Duration::from_millis(100)));
             });
+
+            events.as_mut().map(|events| {
+                for event in events.iter() {
+                    match event.token() {
+
+                        // write event
+                        writer => if event.readiness().is_writable() {
+                            self.handle_write_event(writer);
+                        },
+
+                        // read and accept
+                        reader => if event.readiness().is_readable() {
+                            self.handle_read_or_accept_event(reader);
+                        }
+                    }
+                }
+            });
+
             //poll.poll(events, Some(Duration::from_millis(100)));
 
             //for event in events.iter() {
             //    match event.token() {
-                    // read and accept
+            // read and accept
             //        reader => if event.readiness().is_readable() {},
-                    // write event
+            // write event
             //        writer => if event.readiness().is_writable() {}
             //    }
             //}
