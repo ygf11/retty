@@ -215,11 +215,6 @@ impl EventLoop {
             Err(e) => println!("err"),
         }
     }
-
-    fn get_events(&mut self) -> Events {
-        let events = self.events.take();
-        events.expect("empty events error.")
-    }
 }
 
 pub enum Operation {
