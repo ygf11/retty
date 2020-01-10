@@ -27,6 +27,8 @@ pub trait Channel {
     fn register(&self, poll: &Poll, token: Token);
 
     fn is_server(&self) -> bool;
+
+    fn fire_channel_read(&mut self, buffer:Vec<u8>);
 }
 
 pub struct SocketChannel {
@@ -72,6 +74,10 @@ impl Channel for SocketChannel {
 
     fn is_server(&self) -> bool {
         false
+    }
+
+    fn fire_channel_read(&mut self, buffer:Vec<u8>){
+
     }
 }
 
@@ -126,5 +132,9 @@ impl Channel for ServerChannel {
 
     fn is_server(&self) -> bool {
         true
+    }
+
+    fn fire_channel_read(&mut self, buffer:Vec<u8>){
+
     }
 }
