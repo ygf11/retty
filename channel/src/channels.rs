@@ -76,12 +76,17 @@ impl Channel for SocketChannel {
 
                 Err(e) => {
                     // end read
+                    println!("end of read.");
                     break;
                 }
             }
         }
 
         buffer
+    }
+
+    fn fire_channel_read(&mut self, buffer: Vec<u8>) {
+
     }
 
     fn write(&self) {}
@@ -99,7 +104,7 @@ impl Channel for SocketChannel {
         false
     }
 
-    fn fire_channel_read(&mut self, buffer: Vec<u8>) {}
+
 }
 
 pub struct ServerChannel {
