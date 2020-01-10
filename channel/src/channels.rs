@@ -8,6 +8,7 @@ use std::rc::Rc;
 use crate::pipeline::NewPipeline;
 use std::sync::mpsc::Sender;
 use std::error::Error;
+use std::io::Read;
 
 /// channel trait
 pub trait Channel {
@@ -16,7 +17,7 @@ pub trait Channel {
     fn child_handler(&self) -> Box<dyn NewPipeline + Send>;
 
     /// event loop invoke this read method
-    fn read(&mut self);
+    fn read(&mut self) -> Vec<u8>;
 
     /// callback
     fn write(&self);
@@ -28,7 +29,7 @@ pub trait Channel {
 
     fn is_server(&self) -> bool;
 
-    fn fire_channel_read(&mut self, buffer:Vec<u8>);
+    fn fire_channel_read(&mut self, buffer: Vec<u8>);
 }
 
 pub struct SocketChannel {
@@ -54,11 +55,33 @@ impl Channel for SocketChannel {
         panic!("unsupport operation for socket channel.");
     }
 
-    fn read(&mut self) {
+    fn read(&mut self) -> Vec<u8> {
         // 1. read from socket
         // 2. pipeline.handle_channel_read()
         // 3. pipeline.handle_channel_write()
         // 4. channel.write()
+        let mut buffer = Vec::new();
+        let mut array = buffer.as_mut_slice();
+        let mut read: usize = 0;
+        loop {
+            let channel = &mut self.channel;
+            let result = channel.read(&mut array[read..] );
+            match result {
+                Ok(0) => {
+                    // close
+                }
+                Ok(n) => {
+                    read += n;
+                }
+
+                Err(e) => {
+                    // end read
+                    break;
+                }
+            }
+        }
+
+        buffer
     }
 
     fn write(&self) {}
@@ -76,9 +99,7 @@ impl Channel for SocketChannel {
         false
     }
 
-    fn fire_channel_read(&mut self, buffer:Vec<u8>){
-
-    }
+    fn fire_channel_read(&mut self, buffer: Vec<u8>) {}
 }
 
 pub struct ServerChannel {
@@ -111,7 +132,7 @@ impl Channel for ServerChannel {
     }
 
     /// accept connection
-    fn read(&mut self) {
+    fn read(&mut self) -> Vec<u8> {
         panic!("unsupport operation for serverChannel.")
     }
 
@@ -134,7 +155,5 @@ impl Channel for ServerChannel {
         true
     }
 
-    fn fire_channel_read(&mut self, buffer:Vec<u8>){
-
-    }
+    fn fire_channel_read(&mut self, buffer: Vec<u8>) {}
 }
