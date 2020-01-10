@@ -56,10 +56,6 @@ impl Channel for SocketChannel {
     }
 
     fn read(&mut self) -> Vec<u8> {
-        // 1. read from socket
-        // 2. pipeline.handle_channel_read()
-        // 3. pipeline.handle_channel_write()
-        // 4. channel.write()
         let mut buffer = Vec::new();
         let mut array = buffer.as_mut_slice();
         let mut read: usize = 0;
@@ -85,10 +81,6 @@ impl Channel for SocketChannel {
         buffer
     }
 
-    fn fire_channel_read(&mut self, buffer: Vec<u8>) {
-
-    }
-
     fn write(&self) {}
 
     fn accept(&mut self) -> Result<TcpStream, &'static str> {
@@ -104,7 +96,13 @@ impl Channel for SocketChannel {
         false
     }
 
-
+    fn fire_channel_read(&mut self, buffer: Vec<u8>) {
+        // 1. read from socket
+        // 2. pipeline.handle_channel_read()
+        // 3. pipeline.handle_channel_write()
+        // 4. channel.write()
+        self.pipeline.handle_read_event(buffer);
+    }
 }
 
 pub struct ServerChannel {
@@ -160,5 +158,7 @@ impl Channel for ServerChannel {
         true
     }
 
-    fn fire_channel_read(&mut self, buffer: Vec<u8>) {}
+    fn fire_channel_read(&mut self, buffer: Vec<u8>) {
+        panic!("unsupport operation for serverChannel.")
+    }
 }
