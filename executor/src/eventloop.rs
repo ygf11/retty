@@ -62,7 +62,9 @@ impl EventLoop {
     }
 
     /// private method
-    fn deregister(&mut self) {}
+    fn deregister(&mut self, token:Token) {
+
+    }
 
     /// thread run loop
     pub fn run_loop(&mut self) {
@@ -184,6 +186,7 @@ impl EventLoop {
             }
         }
 
+        // write back
         if let Some(channel) = value {
             self.channels.insert(token, channel);
         }
@@ -195,6 +198,7 @@ impl EventLoop {
             channel.write();
         }
 
+        // write back
         if let Some(channel) = value {
             self.channels.insert(token, channel);
         }
@@ -224,8 +228,11 @@ pub enum Operation {
     Connect(SocketAddr, Box<dyn  NewPipeline + Send>),
 }
 
-pub struct LocalTask {
-    channel: Option<SocketChannel>,
+/// TODO localTask 1. register child channel 2. deregister channel
+pub enum LocalTask {
+    Register(SocketChannel),
+    Deregister(Token),
+    //channel: Option<SocketChannel>,
 }
 
 
