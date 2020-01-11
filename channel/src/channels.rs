@@ -8,6 +8,7 @@ use std::rc::Rc;
 use crate::pipeline::NewPipeline;
 use std::sync::mpsc::Sender;
 use std::error::Error;
+use std::io;
 use std::io::Read;
 
 /// channel trait
@@ -27,7 +28,7 @@ pub trait Channel {
     /// register interested
     fn register(&self, poll: &Poll, token: Token);
 
-    fn deregister(&self, poll:&Poll);
+    fn deregister(&self, poll: &Poll);
 
     fn is_server(&self) -> bool;
 
@@ -63,7 +64,7 @@ impl Channel for SocketChannel {
         let mut read: usize = 0;
         loop {
             let channel = &mut self.channel;
-            let result = channel.read(&mut array[read..] );
+            let result = channel.read(&mut array[read..]);
             match result {
                 Ok(0) => {
                     // close
@@ -72,11 +73,13 @@ impl Channel for SocketChannel {
                     read += n;
                 }
 
-                Err(e) => {
-                    // end read
-                    println!("end of read.");
-                    break;
-                }
+                Err(ref err) if would_block(err) => break,
+
+                Err(ref err)  if interrupted(err) => continue,
+
+                // todo return err
+                Err(err) => break,
+                // other error
             }
         }
 
@@ -94,7 +97,7 @@ impl Channel for SocketChannel {
                       Ready::readable() | Ready::writable(), PollOpt::edge());
     }
 
-    fn deregister(&self, poll:&Poll){
+    fn deregister(&self, poll: &Poll) {
         poll.deregister(&self.channel);
     }
 
@@ -160,7 +163,7 @@ impl Channel for ServerChannel {
                       Ready::readable() | Ready::writable(), PollOpt::edge());
     }
 
-    fn deregister(&self, poll:&Poll){
+    fn deregister(&self, poll: &Poll) {
         poll.deregister(&self.channel);
     }
 
@@ -171,4 +174,12 @@ impl Channel for ServerChannel {
     fn fire_channel_read(&mut self, buffer: Vec<u8>) {
         panic!("unsupport operation for serverChannel.")
     }
+}
+
+fn would_block(err: &std::io::Error) -> bool {
+    err.kind() == io::ErrorKind::WouldBlock
+}
+
+fn interrupted(err: &std::io::Error) -> bool {
+    err.kind() == io::ErrorKind::Interrupted
 }
