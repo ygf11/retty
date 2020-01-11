@@ -62,7 +62,8 @@ impl EventLoop {
     }
 
     /// private method
-    fn deregister(&mut self, token:Token) {
+    fn deregister(&mut self, token: Token) {
+        // deregister
 
     }
 
@@ -207,7 +208,6 @@ impl EventLoop {
     fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {
         let buffer = channel.read();
         channel.fire_channel_read(buffer);
-
     }
 
     fn handle_accept_event(&mut self, channel: &mut Box<dyn Channel>) {
@@ -230,8 +230,8 @@ pub enum Operation {
 
 /// TODO localTask 1. register child channel 2. deregister channel
 pub enum LocalTask {
-    Register(SocketChannel),
     Deregister(Token),
+    Register(SocketChannel),
     //channel: Option<SocketChannel>,
 }
 

@@ -27,6 +27,8 @@ pub trait Channel {
     /// register interested
     fn register(&self, poll: &Poll, token: Token);
 
+    fn deregister(&self, poll:&Poll);
+
     fn is_server(&self) -> bool;
 
     fn fire_channel_read(&mut self, buffer: Vec<u8>);
@@ -92,6 +94,10 @@ impl Channel for SocketChannel {
                       Ready::readable() | Ready::writable(), PollOpt::edge());
     }
 
+    fn deregister(&self, poll:&Poll){
+        poll.deregister(&self.channel);
+    }
+
     fn is_server(&self) -> bool {
         false
     }
@@ -152,6 +158,10 @@ impl Channel for ServerChannel {
     fn register(&self, poll: &Poll, token: Token) {
         poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
+    }
+
+    fn deregister(&self, poll:&Poll){
+        poll.deregister(&self.channel);
     }
 
     fn is_server(&self) -> bool {
