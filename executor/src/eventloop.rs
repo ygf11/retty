@@ -208,7 +208,10 @@ impl EventLoop {
     }
 
     fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {
-        //let buffer = channel.read();
+        match channel.read(){
+            Ok(buffer) => channel.fire_channel_read(buffer),
+            Err(e) => println!("err"),
+        };
         //channel.fire_channel_read(buffer);
     }
 
