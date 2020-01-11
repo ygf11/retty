@@ -18,7 +18,7 @@ pub trait Channel {
     fn child_handler(&self) -> Box<dyn NewPipeline + Send>;
 
     /// event loop invoke this read method
-    fn read(&mut self) -> Vec<u8>;
+    fn read(&mut self) -> Result<Vec<u8>, io::Error>;
 
     /// callback
     fn write(&self);
@@ -58,7 +58,7 @@ impl Channel for SocketChannel {
         panic!("unsupport operation for socket channel.");
     }
 
-    fn read(&mut self) -> Vec<u8> {
+    fn read(&mut self) -> Result<Vec<u8>, io::Error> {
         let mut buffer = Vec::new();
         let mut array = buffer.as_mut_slice();
         let mut read: usize = 0;
@@ -69,21 +69,16 @@ impl Channel for SocketChannel {
                 Ok(0) => {
                     // close
                 }
-                Ok(n) => {
-                    read += n;
-                }
+                Ok(n) => read += n,
 
                 Err(ref err) if would_block(err) => break,
+                Err(ref err) if interrupted(err) => continue,
 
-                Err(ref err)  if interrupted(err) => continue,
-
-                // todo return err
-                Err(err) => break,
-                // other error
+                Err(err) => return Err(err),
             }
         }
 
-        buffer
+        Ok(buffer)
     }
 
     fn write(&self) {}
@@ -144,7 +139,7 @@ impl Channel for ServerChannel {
     }
 
     /// accept connection
-    fn read(&mut self) -> Vec<u8> {
+    fn read(&mut self) -> Result<Vec<u8>, io::Error> {
         panic!("unsupport operation for serverChannel.")
     }
 

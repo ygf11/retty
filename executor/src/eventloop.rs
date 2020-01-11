@@ -208,8 +208,8 @@ impl EventLoop {
     }
 
     fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {
-        let buffer = channel.read();
-        channel.fire_channel_read(buffer);
+        //let buffer = channel.read();
+        //channel.fire_channel_read(buffer);
     }
 
     fn handle_accept_event(&mut self, channel: &mut Box<dyn Channel>) {
