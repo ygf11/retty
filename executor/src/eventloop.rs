@@ -64,7 +64,9 @@ impl EventLoop {
     /// private method
     fn deregister(&mut self, token: Token) {
         // deregister
-
+        self.channels.get(&token).map(|channel|
+            channel.deregister(&self.poll));
+        self.channels.remove(&token);
     }
 
     /// thread run loop
