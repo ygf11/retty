@@ -20,6 +20,7 @@ use crate::token::Tokens;
 use self::channel::handlers::Handler;
 use std::net::SocketAddr;
 use self::channel::pipeline::NewPipeline;
+use std::mem::take;
 
 pub struct EventLoop {
     poll: Poll,
@@ -93,7 +94,6 @@ impl EventLoop {
                             self.handle_read_or_accept_event(reader),
 
                         _ => println!("err"),
-
                     }
                 }
             });
@@ -135,12 +135,15 @@ impl EventLoop {
 
     fn run_local_tasks(&mut self) {
         // local
-        let queue = self.task_queue.take()
+        let mut queue = self.task_queue.take()
             .expect("none task_queue in eventloop.");
 
-        for task in queue.iter() {
+        while let Some(task) = queue.pop() {
             self.run_local_task(task);
         }
+        // for task in queue.iter() {
+        //    self.run_local_task(task);
+        //}
 
         self.task_queue = Some(queue);
     }
@@ -170,9 +173,13 @@ impl EventLoop {
         }
     }
 
-    fn run_local_task(&mut self, task: &LocalTask) {
+    fn run_local_task(&mut self, task: LocalTask) {
         // run local task
         // let channel = task.channel;
+        match task {
+            LocalTask::Register(channel) => self.register(channel),
+            LocalTask::Deregister(token) => self.deregister(token),
+        }
     }
 
     fn next_token(&mut self) -> Token {
@@ -209,9 +216,9 @@ impl EventLoop {
     }
 
     fn handle_read_event(&mut self,
-                         token:Token,
+                         token: Token,
                          channel: &mut Box<dyn Channel>) {
-        match channel.read(){
+        match channel.read() {
             Ok(buffer) => channel.fire_channel_read(buffer),
             Err(e) => self.add_local_task(LocalTask::Deregister(token)),
         };
@@ -219,7 +226,7 @@ impl EventLoop {
     }
 
     fn handle_accept_event(&mut self,
-                           token:Token,
+                           token: Token,
                            channel: &mut Box<dyn Channel>) {
         let pipeline = channel.child_handler();
         match channel.accept() {
@@ -232,9 +239,9 @@ impl EventLoop {
         }
     }
 
-    fn add_local_task(&mut self, task:LocalTask){
+    fn add_local_task(&mut self, task: LocalTask) {
         self.task_queue.as_mut().map(|queue| {
-           queue.push(task);
+            queue.push(task);
         });
     }
 }
@@ -244,11 +251,9 @@ pub enum Operation {
     Connect(SocketAddr, Box<dyn  NewPipeline + Send>),
 }
 
-/// TODO localTask 1. register child channel 2. deregister channel
 pub enum LocalTask {
     Deregister(Token),
-    Register(SocketChannel),
-    //channel: Option<SocketChannel>,
+    Register(Box<SocketChannel>),
 }
 
 
