@@ -228,7 +228,7 @@ impl EventLoop {
                     Box::new(SocketChannel::new(tcp_stream, pipeline)));
             }
 
-            Err(e) => println!("err"),
+            Err(e) => self.add_local_task(LocalTask::Deregister(token)),
         }
     }
 
