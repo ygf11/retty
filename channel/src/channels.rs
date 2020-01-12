@@ -9,7 +9,7 @@ use crate::pipeline::NewPipeline;
 use std::sync::mpsc::Sender;
 use std::error::Error;
 use std::io;
-use std::io::Read;
+use std::io::{Read, ErrorKind};
 
 /// channel trait
 pub trait Channel {
@@ -66,9 +66,8 @@ impl Channel for SocketChannel {
             let channel = &mut self.channel;
             let result = channel.read(&mut array[read..]);
             match result {
-                Ok(0) => {
-                    // close
-                }
+                Ok(0) => return Err(close_error()),
+
                 Ok(n) => read += n,
 
                 Err(ref err) if would_block(err) => break,
@@ -177,4 +176,8 @@ fn would_block(err: &std::io::Error) -> bool {
 
 fn interrupted(err: &std::io::Error) -> bool {
     err.kind() == io::ErrorKind::Interrupted
+}
+
+fn close_error() -> io::Error{
+    io::Error::new(ErrorKind::ConnectionAborted, "connection closed")
 }
