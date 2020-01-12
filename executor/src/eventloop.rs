@@ -185,8 +185,8 @@ impl EventLoop {
 
         if let Some(channel) = value.as_mut() {
             match channel.is_server() {
-                true => self.handle_accept_event(channel),
-                false => self.handle_read_event(channel),
+                true => self.handle_accept_event(token, channel),
+                false => self.handle_read_event(token, channel),
             }
         }
 
@@ -208,15 +208,19 @@ impl EventLoop {
         }
     }
 
-    fn handle_read_event(&mut self, channel: &mut Box<dyn Channel>) {
+    fn handle_read_event(&mut self,
+                         token:Token,
+                         channel: &mut Box<dyn Channel>) {
         match channel.read(){
             Ok(buffer) => channel.fire_channel_read(buffer),
-            Err(e) => println!("err"),
+            Err(e) => self.add_local_task(LocalTask::Deregister(token)),
         };
         //channel.fire_channel_read(buffer);
     }
 
-    fn handle_accept_event(&mut self, channel: &mut Box<dyn Channel>) {
+    fn handle_accept_event(&mut self,
+                           token:Token,
+                           channel: &mut Box<dyn Channel>) {
         let pipeline = channel.child_handler();
         match channel.accept() {
             Ok(tcp_stream) => {
@@ -226,6 +230,12 @@ impl EventLoop {
 
             Err(e) => println!("err"),
         }
+    }
+
+    fn add_local_task(&mut self, task:LocalTask){
+        self.task_queue.as_mut().map(|queue| {
+           queue.push(task);
+        });
     }
 }
 
