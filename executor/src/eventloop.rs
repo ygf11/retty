@@ -85,14 +85,15 @@ impl EventLoop {
                     match event.token() {
 
                         // write event
-                        writer => if event.readiness().is_writable() {
-                            self.handle_write_event(writer);
-                        },
+                        writer if event.readiness().is_writable() =>
+                            self.handle_write_event(writer),
 
                         // read and accept
-                        reader => if event.readiness().is_readable() {
-                            self.handle_read_or_accept_event(reader);
-                        }
+                        reader if event.readiness().is_readable() =>
+                            self.handle_read_or_accept_event(reader),
+
+                        _ => println!("err"),
+
                     }
                 }
             });
