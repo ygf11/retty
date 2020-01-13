@@ -1,7 +1,5 @@
 use self::super::handlers::Handler;
-use std::ops::Deref;
 use std::rc::Weak;
-use std::marker::PhantomData;
 
 /// channel pipeline
 pub struct PipeLine {
@@ -39,7 +37,7 @@ impl PipeLine {
     pub fn add_all(&mut self, handlers: Vec<Box<dyn Handler + Send>>) {
         let mut handlers = handlers;
         let size = handlers.len();
-        for handler in 0..size {
+        for _handler in 0..size {
             self.add_last(handlers.remove(0))
         }
     }
@@ -216,10 +214,10 @@ pub struct Message<T> {
 }
 
 impl<T> Message<T> {
-    fn new(data: T, propagate: bool) -> Message<T> {
+    fn new(data: T, _propagate: bool) -> Message<T> {
         Message {
             data: Some(data),
-            propagate: false,
+            propagate: _propagate,
         }
     }
 

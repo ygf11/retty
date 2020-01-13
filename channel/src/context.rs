@@ -1,4 +1,3 @@
-use self::super::channels::Channel;
 
 /// inbound context
 /// read event

@@ -1,13 +1,7 @@
 use mio::net::{TcpStream, TcpListener};
-use self::super::pipeline::PipeLine;
-use self::super::handlers::Handler;
 use std::net::SocketAddr;
-use std::borrow::BorrowMut;
 use mio::{Poll, Token, Ready, PollOpt};
-use std::rc::Rc;
 use crate::pipeline::NewPipeline;
-use std::sync::mpsc::Sender;
-use std::error::Error;
 use std::io;
 use std::io::{Read, ErrorKind};
 
@@ -60,7 +54,7 @@ impl Channel for SocketChannel {
 
     fn read(&mut self) -> Result<Vec<u8>, io::Error> {
         let mut buffer = Vec::new();
-        let mut array = buffer.as_mut_slice();
+        let array = buffer.as_mut_slice();
         let mut read: usize = 0;
         loop {
             let channel = &mut self.channel;
@@ -118,7 +112,7 @@ impl ServerChannel {
                handler: Box<dyn NewPipeline + Send>)
                -> Result<ServerChannel, &'static str> {
         let socket = TcpListener::bind(&address).
-            map_err(|err| "bind failed.")?;
+            map_err(|_err| "bind failed.")?;
 
         let result = ServerChannel {
             pipeline: handler,
@@ -147,8 +141,8 @@ impl Channel for ServerChannel {
     fn accept(&mut self) -> Result<TcpStream, &'static str> {
         let channel = &mut self.channel;
         match channel.accept() {
-            Ok((tcpStream, addr)) => Ok(tcpStream),
-            Err(e) => Err("accept connection error."),
+            Ok((tcpStream, _addr)) => Ok(tcpStream),
+            Err(_err) => Err("accept connection error."),
         }
     }
 
@@ -165,7 +159,7 @@ impl Channel for ServerChannel {
         true
     }
 
-    fn fire_channel_read(&mut self, buffer: Vec<u8>) {
+    fn fire_channel_read(&mut self, _buffer: Vec<u8>) {
         panic!("unsupport operation for serverChannel.")
     }
 }

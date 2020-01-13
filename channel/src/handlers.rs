@@ -1,4 +1,3 @@
-use crate::pipeline::Message;
 
 pub trait Handler {
     /*
