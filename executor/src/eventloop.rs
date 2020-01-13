@@ -108,7 +108,10 @@ impl EventLoop {
 
     pub fn execute(&mut self, task: Message) {
         // todo handle result
-        self.sender.clone().send(task);
+        let result = self.sender.clone().send(task);
+        if let Err(_err) = result{
+            // log
+        }
     }
 
     fn run_tasks(&mut self) {
