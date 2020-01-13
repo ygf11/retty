@@ -81,11 +81,13 @@ impl Channel for SocketChannel {
     }
 
     fn register(&self, poll: &Poll, token: Token) {
+        // todo handle result
         poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
     }
 
     fn deregister(&self, poll: &Poll) {
+        // todo handle result
         poll.deregister(&self.channel);
     }
 
@@ -141,17 +143,19 @@ impl Channel for ServerChannel {
     fn accept(&mut self) -> Result<TcpStream, &'static str> {
         let channel = &mut self.channel;
         match channel.accept() {
-            Ok((tcpStream, _addr)) => Ok(tcpStream),
+            Ok((tcp_stream, _addr)) => Ok(tcp_stream),
             Err(_err) => Err("accept connection error."),
         }
     }
 
     fn register(&self, poll: &Poll, token: Token) {
+        // todo handle result
         poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
     }
 
     fn deregister(&self, poll: &Poll) {
+        // todo handle result
         poll.deregister(&self.channel);
     }
 

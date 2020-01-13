@@ -1,5 +1,4 @@
 use self::super::handlers::Handler;
-use std::rc::Weak;
 
 /// channel pipeline
 pub struct PipeLine {

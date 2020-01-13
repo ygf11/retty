@@ -78,6 +78,7 @@ impl EventLoop {
             let channels = &mut self.channels;
 
             events.as_mut().map(|events| {
+                // todo handle result
                 poll.poll(events, Some(Duration::from_millis(100)));
             });
 
@@ -110,6 +111,7 @@ impl EventLoop {
     }
 
     pub fn execute(&mut self, task: Message) {
+        // todo handle result
         self.sender.clone().send(task);
     }
 
