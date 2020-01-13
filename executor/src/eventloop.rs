@@ -73,18 +73,11 @@ impl EventLoop {
     /// thread run loop
     pub fn run_loop(&mut self) {
         loop {
-            //let poll = &mut self.poll;
-            //let mut events = self.events.take();
-
             self.poll(Duration::from_millis(200));
 
             let channels = &mut self.channels;
 
             let mut events = self.events.take();
-            //events.as_mut().map(|events| {
-                // todo handle result
-            //    poll.poll(events, Some(Duration::from_millis(100)));
-            //});
 
             events.as_mut().map(|events| {
                 for event in events.iter() {

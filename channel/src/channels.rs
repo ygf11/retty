@@ -81,7 +81,6 @@ impl Channel for SocketChannel {
     }
 
     fn register(&self, poll: &Poll, token: Token) {
-        // todo handle result
         let result = poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
 
@@ -92,7 +91,6 @@ impl Channel for SocketChannel {
     }
 
     fn deregister(&self, poll: &Poll) {
-        // todo handle result
         let result = poll.deregister(&self.channel);
         if result.is_err(){
             // log
@@ -158,7 +156,6 @@ impl Channel for ServerChannel {
     }
 
     fn register(&self, poll: &Poll, token: Token) {
-        // todo handle result
         let result = poll.register(&self.channel, token,
                       Ready::readable() | Ready::writable(), PollOpt::edge());
 
@@ -169,7 +166,6 @@ impl Channel for ServerChannel {
     }
 
     fn deregister(&self, poll: &Poll) {
-        // todo handle result
         let result = poll.deregister(&self.channel);
         if result.is_err(){
             // log

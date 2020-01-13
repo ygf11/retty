@@ -31,7 +31,10 @@ impl ServerBootStrap {
         self.sender.as_ref().map(move |sender| {
             let message = Operation::Bind(addr, pipeline);
             // todo handle result
-            sender.send(message);
+            let result = sender.send(message);
+            if let Err(_err) = result{
+                // log
+            }
         });
     }
 
@@ -42,7 +45,10 @@ impl ServerBootStrap {
         self.sender.as_ref().map(move |sender| {
             let message = Operation::Connect(addr, pipeline);
             // todo handle result
-            sender.send(message);
+            let result = sender.send(message);
+            if let Err(_err) = result{
+                // log
+            }
         });
     }
 
