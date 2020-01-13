@@ -73,14 +73,18 @@ impl EventLoop {
     /// thread run loop
     pub fn run_loop(&mut self) {
         loop {
-            let poll = &mut self.poll;
-            let mut events = self.events.take();
+            //let poll = &mut self.poll;
+            //let mut events = self.events.take();
+
+            self.poll(Duration::from_millis(200));
+
             let channels = &mut self.channels;
 
-            events.as_mut().map(|events| {
+            let mut events = self.events.take();
+            //events.as_mut().map(|events| {
                 // todo handle result
-                poll.poll(events, Some(Duration::from_millis(100)));
-            });
+            //    poll.poll(events, Some(Duration::from_millis(100)));
+            //});
 
             events.as_mut().map(|events| {
                 for event in events.iter() {
@@ -244,6 +248,18 @@ impl EventLoop {
         self.task_queue.as_mut().map(|queue| {
             queue.push(task);
         });
+    }
+
+    fn poll(&mut self, time:Duration) {
+        let mut events = self.events.take();
+        events.as_mut().map(|events| {
+            let result = self.poll.poll(events, Some(time));
+            if result.is_err(){
+                // log
+            };
+        });
+
+        self.events = events;
     }
 }
 
