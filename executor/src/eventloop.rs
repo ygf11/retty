@@ -101,7 +101,6 @@ impl EventLoop {
 
             self.events = events;
 
-            // TODO handle tasks
             self.run_tasks();
         }
     }
@@ -237,7 +236,7 @@ impl EventLoop {
                     Box::new(SocketChannel::new(tcp_stream, pipeline)));
             }
 
-            Err(e) => self.add_local_task(LocalTask::Deregister(token)),
+            Err(_err) => self.add_local_task(LocalTask::Deregister(token)),
         }
     }
 
