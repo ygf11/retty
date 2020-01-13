@@ -36,7 +36,8 @@ pub struct SocketChannel {
 }
 
 impl SocketChannel {
-    pub fn new(channel: TcpStream, handler: Box<dyn NewPipeline + Send>) -> SocketChannel {
+    pub fn new(channel: TcpStream,
+               handler: Box<dyn NewPipeline + Send>) -> SocketChannel {
         SocketChannel {
             channel,
             pipeline: handler,
