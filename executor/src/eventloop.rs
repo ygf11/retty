@@ -107,7 +107,6 @@ impl EventLoop {
     }
 
     pub fn execute(&mut self, task: Message) {
-        // todo handle result
         let result = self.sender.clone().send(task);
         if let Err(_err) = result{
             // log
@@ -185,7 +184,13 @@ impl EventLoop {
 
     fn next_token(&mut self) -> Token {
         // TODO UNIQUE
-        self.tokens.next()
+        loop {
+            let token = self.tokens.next();
+            let exists = self.channels.contains_key(&token);
+            if !exists{
+                return token
+            }
+        }
     }
 
     fn handle_read_or_accept_event(&mut self, token: Token) {
