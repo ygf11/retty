@@ -183,7 +183,6 @@ impl EventLoop {
     }
 
     fn next_token(&mut self) -> Token {
-        // TODO UNIQUE
         loop {
             let token = self.tokens.next();
             let exists = self.channels.contains_key(&token);
@@ -267,6 +266,7 @@ impl EventLoop {
 pub enum Operation {
     Bind(SocketAddr, Box<dyn NewPipeline + Send>),
     Connect(SocketAddr, Box<dyn  NewPipeline + Send>),
+
 }
 
 pub enum LocalTask {
